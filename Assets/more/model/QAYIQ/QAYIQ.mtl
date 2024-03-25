@@ -1,0 +1,82 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v3.1.22885447)
+
+newmtl wire_166229229
+kd 0.651 0.898 0.898
+ka 0.651 0.898 0.898
+ks 0.35 0.35 0.35
+ke 0 0 0
+d 1
+Ns 128
+illum 2
+
+newmtl Metal_Chrome
+kd 0.4392 0.4392 0.4392
+ka 0 0 0
+ks 1.35 1.35 1.35
+ke 0 0 0
+d 1
+Ns 80
+illum 2
+
+newmtl Material__2
+kd 0.4392 0.8275 0.9529
+ka 0.4392 0.8275 0.9529
+ks 0.792 0.792 0.792
+ke 0 0 0
+d 0.25
+Ns 132
+illum 2
+
+newmtl Material__15
+kd 0.1922 0.1922 0.1922
+ka 0 0 0
+ks 0.792 0.792 0.792
+ke 0 0 0
+d 1
+Ns 100
+illum 2
+
+newmtl wire_088177026
+kd 0.3451 0.6941 0.102
+ka 0.3451 0.6941 0.102
+ks 0.35 0.35 0.35
+ke 0 0 0
+d 1
+Ns 128
+illum 2
+
+newmtl wire_057008136
+kd 0.2235 0.0314 0.5333
+ka 0.2235 0.0314 0.5333
+ks 0.35 0.35 0.35
+ke 0 0 0
+d 1
+Ns 128
+illum 2
+
+newmtl wire_213154229
+kd 0.8353 0.6039 0.898
+ka 0.8353 0.6039 0.898
+ks 0.35 0.35 0.35
+ke 0 0 0
+d 1
+Ns 128
+illum 2
+
+newmtl Fabric_Grey_Carpet
+kd 0.1765 0.1765 0.1765
+ka 0 0 0
+ks 0 0 0
+ke 0 0 0
+d 1
+illum 1
+
+newmtl White_Matte
+kd 0.9412 0.9412 0.9412
+ka 0.7451 0.7451 0.7451
+ks 0 0 0
+ke 0 0 0
+d 1
+illum 1
+

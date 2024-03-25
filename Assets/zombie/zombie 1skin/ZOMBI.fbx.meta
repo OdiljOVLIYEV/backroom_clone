@@ -1,0 +1,598 @@
+fileFormatVersion: 2
+guid: 49539acfc3ed882498416ced0a9546b2
+ModelImporter:
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      74: -6976627071021616374
+    second: zombie_him.qc_skeleton|angry
+  - first:
+      74: -2313183544662471500
+    second: zombie_him.qc_skeleton|attack1
+  - first:
+      74: 8635068569111379499
+    second: zombie_him.qc_skeleton|attack2
+  - first:
+      74: 8886290906271353789
+    second: zombie_him.qc_skeleton|attack3
+  - first:
+      74: -5941312369223453010
+    second: zombie_him.qc_skeleton|attack4
+  - first:
+      74: -2396724047186692006
+    second: zombie_him.qc_skeleton|bigflinch
+  - first:
+      74: 8351428825487855242
+    second: zombie_him.qc_skeleton|diebackward
+  - first:
+      74: -9128896640791548243
+    second: zombie_him.qc_skeleton|dieforward
+  - first:
+      74: 4656422807040061550
+    second: zombie_him.qc_skeleton|dieheadshot
+  - first:
+      74: 5190346993291444896
+    second: zombie_him.qc_skeleton|dieheadshot2
+  - first:
+      74: 8223214253959209155
+    second: zombie_him.qc_skeleton|diesimple
+  - first:
+      74: -8366269110739871141
+    second: zombie_him.qc_skeleton|eating1
+  - first:
+      74: -6789354222707216705
+    second: zombie_him.qc_skeleton|eating2
+  - first:
+      74: 7874594036104723585
+    second: zombie_him.qc_skeleton|eating3
+  - first:
+      74: -7781196945487020584
+    second: zombie_him.qc_skeleton|fake1_dead
+  - first:
+      74: -991652757259334746
+    second: zombie_him.qc_skeleton|fake1_rising
+  - first:
+      74: -4457374117427662406
+    second: zombie_him.qc_skeleton|fake2_dead
+  - first:
+      74: -4337846112054294985
+    second: zombie_him.qc_skeleton|fake2_rising
+  - first:
+      74: 8831245412742940051
+    second: zombie_him.qc_skeleton|fake3_dead
+  - first:
+      74: -2679426280918606281
+    second: zombie_him.qc_skeleton|fake3_rising
+  - first:
+      74: -6169433200969933411
+    second: zombie_him.qc_skeleton|fake4_dead
+  - first:
+      74: 6300944913591480377
+    second: zombie_him.qc_skeleton|fake4_rising
+  - first:
+      74: -2962380931524783786
+    second: zombie_him.qc_skeleton|flinch
+  - first:
+      74: 6208073373065824173
+    second: zombie_him.qc_skeleton|flinchsmall
+  - first:
+      74: 6361176705923336251
+    second: zombie_him.qc_skeleton|idle1
+  - first:
+      74: 5875996557386647404
+    second: zombie_him.qc_skeleton|idle2
+  - first:
+      74: 7639720362361613116
+    second: zombie_him.qc_skeleton|idle3
+  - first:
+      74: 1978446065478358420
+    second: zombie_him.qc_skeleton|turnleft
+  - first:
+      74: 8696404980083143559
+    second: zombie_him.qc_skeleton|turnright
+  - first:
+      74: 2191136735223297019
+    second: zombie_him.qc_skeleton|walk1
+  - first:
+      74: 2379147197295146045
+    second: zombie_him.qc_skeleton|walk2
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat.bmp
+    second: {fileID: 2100000, guid: bd1ffaf02ba697f4eab22612cd2d2989, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_ballon.bmp
+    second: {fileID: 2100000, guid: b5f6f7609f2426a4789dd681ae7d9c7d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_glass.bmp
+    second: {fileID: 2100000, guid: 6eb386f9114d6fa499ab58089fc8ce3e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_mask.bmp
+    second: {fileID: 2100000, guid: 27674a51dda8a0944a03984d8e3dd81b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hazmat_zombied.bmp
+    second: {fileID: 2100000, guid: f9907f3b63d8be84e90aa5b0b806c27d, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat
+    second: {fileID: 2800000, guid: 33308294b55fd12429cd5e1e1b63bbcc, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_ballon
+    second: {fileID: 2800000, guid: 4339c72c4c23fd54fbc973c52cab4adc, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_glass
+    second: {fileID: 2800000, guid: 004e3509967f54c43b4f842f2019cf79, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: geo_hazmat_mask
+    second: {fileID: 2800000, guid: 8f0babc05c61667498c1f7bac760453d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: hazmat_zombied
+    second: {fileID: 2800000, guid: 9d671ee86d092804784c01117e1ad80f, type: 3}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: "\nClip 'zombie_him.qc_skeleton|attack2' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|attack3' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|diebackward' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|dieforward' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|dieheadshot' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|dieheadshot2' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|diesimple' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|eating1' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|eating3' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|fake1_rising' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|fake2_rising' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|fake3_rising' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_spine' has translation
+      animation that will be discarded.\n\t'bip01_l_clavicle' has translation animation
+      that will be discarded.\n\t'bip01_r_clavicle' has translation animation that
+      will be discarded.\n\nClip 'zombie_him.qc_skeleton|fake4_rising' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\t'bip01_r_clavicle' has translation animation
+      that will be discarded.\n\nClip 'zombie_him.qc_skeleton|turnright' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle' has translation
+      animation that will be discarded.\n\nClip 'zombie_him.qc_skeleton|walk1' has
+      import animation warnings that might lower retargeting quality:\nNote: Activate
+      translation DOF on avatar to improve retargeting quality.\n\t'bip01_l_clavicle'
+      has translation animation that will be discarded.\n\t'bip01_r_clavicle' has
+      translation animation that will be discarded.\n\nClip 'zombie_him.qc_skeleton|walk2'
+      has import animation warnings that might lower retargeting quality:\nNote:
+      Activate translation DOF on avatar to improve retargeting quality.\n\t'bip01_spine'
+      has translation animation that will be discarded.\n\t'bip01_l_clavicle' has
+      translation animation that will be discarded.\n\t'bip01_r_clavicle' has translation
+      animation that will be discarded.\n"
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.03
+    meshCompression: 0
+    addColliders: 1
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human:
+    - boneName: bip01_pelvis
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_thigh
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_thigh
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_calf
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_calf
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_foot
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_foot
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_spine
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_spine1
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_head
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_clavicle
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_clavicle
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_upperarm
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_upperarm
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_forearm
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_forearm
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_neck
+      humanName: UpperChest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_foot_end
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_foot_end
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_r_forearm_end
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: bip01_l_forearm_end
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: ZOMBI(Clone)
+      parentName: 
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: zombie_him.qc_skeleton
+      parentName: ZOMBI(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: bip01_pelvis
+      parentName: zombie_him.qc_skeleton
+      position: {x: 0.00013849563, y: 0.00062111276, z: 0.01090837}
+      rotation: {x: 0.76492006, y: -0.024802322, z: -0.64317197, w: -0.024740444}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_l_thigh
+      parentName: bip01_pelvis
+      position: {x: 0.000000004862901, y: 0.0000000021234159, z: 0.0012679307}
+      rotation: {x: -0.20886207, y: 0.9663712, z: -0.020321308, w: 0.14862849}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_l_calf
+      parentName: bip01_l_thigh
+      position: {x: -0.005325388, y: -3.6656872e-10, z: -3.218651e-10}
+      rotation: {x: -0.0000000020036683, y: 5.009172e-10, z: 0.368526, w: 0.92961746}
+      scale: {x: 1, y: 0.9999999, z: 1}
+    - name: bip01_l_foot
+      parentName: bip01_l_calf
+      position: {x: -0.0049208594, y: 1.0728835e-10, z: 8.2030893e-10}
+      rotation: {x: 0.01991301, y: 0.06148421, z: -0.16727082, w: 0.98379046}
+      scale: {x: 0.99999976, y: 0.9999997, z: 0.9999998}
+    - name: bip01_l_foot_end
+      parentName: bip01_l_foot
+      position: {x: -0, y: 0.000051125848, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_r_thigh
+      parentName: bip01_pelvis
+      position: {x: -0.0000000028917566, y: -0.0000000010326504, z: -0.0012679314}
+      rotation: {x: -0.091246076, y: 0.991478, z: 0.07209311, w: 0.05872097}
+      scale: {x: 0.9999999, y: 0.99999994, z: 1.0000002}
+    - name: bip01_r_calf
+      parentName: bip01_r_thigh
+      position: {x: -0.005325388, y: 0, z: -8.940696e-12}
+      rotation: {x: -0.000000007509663, y: 0.0000000014534834, z: 0.27610198, w: 0.96112835}
+      scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+    - name: bip01_r_foot
+      parentName: bip01_r_calf
+      position: {x: -0.0049208594, y: -1.7881394e-10, z: 2.4139882e-10}
+      rotation: {x: -0.018342217, y: -0.029821191, z: -0.19905053, w: 0.9793637}
+      scale: {x: 0.99999994, y: 1, z: 1}
+    - name: bip01_r_foot_end
+      parentName: bip01_r_foot
+      position: {x: -0, y: 0.000051125913, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_spine
+      parentName: bip01_pelvis
+      position: {x: -0.00078570255, y: -0.00015893608, z: -0.00006562604}
+      rotation: {x: 0.0035028884, y: -0.03417459, z: 0.048240837, w: 0.99824476}
+      scale: {x: 0.9999999, y: 1.0000001, z: 1}
+    - name: bip01_spine1
+      parentName: bip01_spine
+      position: {x: -0.003153717, y: -0.0000034284533, z: 3.3974654e-10}
+      rotation: {x: -0.15633488, y: -0.04445484, z: -0.19989595, w: 0.9662426}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_neck
+      parentName: bip01_spine1
+      position: {x: -0.0041903113, y: 0.0005137253, z: 3.5651038e-10}
+      rotation: {x: 0.09643273, y: 0.0078480905, z: -0.36496556, w: 0.9259802}
+      scale: {x: 1, y: 1, z: 0.99999994}
+    - name: bip01_head
+      parentName: bip01_neck
+      position: {x: -0.00089045026, y: 0.0000000036594692, z: -3.5762785e-11}
+      rotation: {x: -0.013767027, y: 0.08788491, z: 0.15855624, w: 0.9833345}
+      scale: {x: 0.99999994, y: 1, z: 0.9999998}
+    - name: bip01_head_end
+      parentName: bip01_head
+      position: {x: -0, y: 0.00005112605, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_l_clavicle
+      parentName: bip01_neck
+      position: {x: 0.0009958073, y: 0.0004173993, z: 0.00073342276}
+      rotation: {x: -0.61360353, y: -0.31810495, z: 0.6973918, w: -0.18959066}
+      scale: {x: 0.99999994, y: 0.9999999, z: 0.9999999}
+    - name: bip01_l_upperarm
+      parentName: bip01_l_clavicle
+      position: {x: -0.0014927625, y: 6.258488e-10, z: -0.0000000016584992}
+      rotation: {x: 0.15543412, y: -0.57966506, z: 0.2966992, w: 0.74283123}
+      scale: {x: 0.99999994, y: 1, z: 1}
+    - name: bip01_l_forearm
+      parentName: bip01_l_upperarm
+      position: {x: -0.003577712, y: 0.0000000011086463, z: -0.0000000032901766}
+      rotation: {x: -0.000009554921, y: -0.0000036465594, z: 0.16696635, w: 0.9859626}
+      scale: {x: 0.99999994, y: 0.9999998, z: 0.9999999}
+    - name: bip01_l_forearm_end
+      parentName: bip01_l_forearm
+      position: {x: -0, y: 0.00005112588, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: bip01_r_clavicle
+      parentName: bip01_neck
+      position: {x: 0.0011106574, y: 0.00017716236, z: -0.0006584173}
+      rotation: {x: 0.6462448, y: 0.22030337, z: 0.6703005, w: -0.2907429}
+      scale: {x: 1, y: 0.9999998, z: 1}
+    - name: bip01_r_upperarm
+      parentName: bip01_r_clavicle
+      position: {x: -0.0014927599, y: -6.8396333e-10, z: 0.0000000024765736}
+      rotation: {x: -0.21423036, y: 0.49373794, z: 0.20189546, w: 0.8182704}
+      scale: {x: 1, y: 0.99999994, z: 0.9999999}
+    - name: bip01_r_forearm
+      parentName: bip01_r_upperarm
+      position: {x: -0.0035777139, y: 1.4305114e-10, z: 0.0000000017881393}
+      rotation: {x: 0.0000032608098, y: 0.000009132774, z: 0.25771344, w: 0.9662214}
+      scale: {x: 0.9999999, y: 0.99999994, z: 0.9999999}
+    - name: bip01_r_forearm_end
+      parentName: bip01_r_forearm
+      position: {x: -0, y: 0.00005112586, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: zombie_him_ref_hazmat
+      parentName: ZOMBI(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.03
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 3
+  humanoidOversampling: 1
+  avatarSetup: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
