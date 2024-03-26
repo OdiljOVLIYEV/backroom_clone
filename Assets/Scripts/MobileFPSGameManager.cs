@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField]
-    GameObject playerPrefab;
+	GameObject playerPrefab;
+	
 	public Transform[] spawnPoints;
 
     // Start is called before the first frame update
@@ -37,7 +38,6 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
                 Debug.Log("Place playerPrefab!");
             }
 
-           
 
 
 

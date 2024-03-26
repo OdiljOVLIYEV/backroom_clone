@@ -27,7 +27,7 @@ public class PlayerMovment : MonoBehaviourPunCallbacks
 	public bool isGrounded;
 	public float speedwalk;
 	public bool jumpidle=false;  
-	private AudioSource source;
+	public AudioSource source;
 	public Animator anim;
    
     // Start is called before the first frame update
