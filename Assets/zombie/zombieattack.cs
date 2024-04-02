@@ -12,7 +12,7 @@ public class zombieattack : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
 	{
-    	
+		if(playertransform!=null)
 		playertransform=GameObject.FindGameObjectWithTag("Player").transform;
 	    
 	    bx= FindObjectOfType<BoxCollider>();
@@ -78,7 +78,7 @@ public class zombieattack : MonoBehaviourPunCallbacks
 	protected void OnTriggerExit(Collider other)
 	{
 		
-
+		attack=false;
         if (other.gameObject.tag == "taxta")
         {
 

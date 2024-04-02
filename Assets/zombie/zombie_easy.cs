@@ -55,8 +55,7 @@ public class zombie_easy : MonoBehaviour
 			//GetComponent<CapsuleCollider>().enabled=false;
 		}*/
 		
-		PlayerHealt cam=FindObjectOfType<PlayerHealt>();
-		cam.CAMERA2.SetActive(false);
+		
 		//if(Vector3.Distance(agent.transform.position,playerTransform.position)> accyrasy);
 	}
 	

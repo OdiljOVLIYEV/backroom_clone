@@ -42,11 +42,20 @@ public class Detector : MonoBehaviourPunCallbacks
 
 	void Update()
 	{
+		
 		if (!photonView.IsMine)
 		{
 			return;
 		}
-
+		
+		if(nearestPlayer!=null){
+			
+			
+			agent.SetDestination(waypoints[currentWaypointIndex].position);
+			animationmove();
+		}
+        
+       
 		if (!isAware)
 		{
 			if (agent.enabled && agent.remainingDistance <= agent.stoppingDistance && !agent.pathPending)

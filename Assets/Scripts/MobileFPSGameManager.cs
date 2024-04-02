@@ -3,70 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
+using Photon.Realtime;
 
 public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField]
+	[SerializeField]
 	GameObject playerPrefab;
 	
 	public Transform[] spawnPoints;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
+	
+	// Start is called before the first frame update
+	void Start()
+	{
+	   
+	    
        
-            if (playerPrefab!=null)
-            {
-            	if (spawnPoints != null && spawnPoints.Length > 0 && playerPrefab != null)
-            	{
-	            	// Bir spawn nuqtasini tanlash
-	            	Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+		if (playerPrefab!=null)
+		{
+			
+				// Bir spawn nuqtasini tanlash
+				Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-	            	// Yangi obyekt spawn qilinadi
-	            	PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, Quaternion.identity);
-            	}
-            	else
-            	{
-	            	Debug.LogWarning("Spawn pointlar yoki obyekt aniqlanmagan!");
-            	}
-	            //int randomPoint = Random.Range(-40, -30);
-	            // PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(randomPoint, -15.2f, randomPoint), Quaternion.identity);
-            }
-            else
-            {
-                Debug.Log("Place playerPrefab!");
-            }
+				// Yangi obyekt spawn qilinadi
+				PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, Quaternion.identity);
+			
+			
+		}
 
 
-
+	    
 
 
         
 	   
 
         
-    }
-    
-	
-    // Update is called once per frame
-    void Update()
-    {
-	   
-    }
-    
-	//#region Public Methods
-    
-	/*public void LeaveRoom() 
-	{
-		PhotonNetwork.LeaveRoom();
 	}
-	#endregion
+    
 	
-	public override void OnLeftRoom()
+	// Update is called once per frame
+	void Update()
 	{
-		SceneManager.LoadScene("LobbyScene");
-	}*/
+	   
+	}
+    
+	
 	
 	
 
@@ -101,7 +82,7 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 			
 		}
 		
-		}	
+	}	
 
 	[PunRPC]
 	private void LeaveRoom()

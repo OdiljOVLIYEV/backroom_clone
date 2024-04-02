@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
+using UnityEngine.UI;
 
 [RequireComponent(typeof (Texture))]
 public class ForcedReset : MonoBehaviour
@@ -13,7 +13,7 @@ public class ForcedReset : MonoBehaviour
         if (CrossPlatformInputManager.GetButtonDown("ResetObject"))
         {
             //... reload the scene
-            SceneManager.LoadScene(SceneManager.GetSceneAt(0).name);
+            SceneManager.LoadScene(SceneManager.GetSceneAt(0).path);
         }
     }
 }
