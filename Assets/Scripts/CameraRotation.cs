@@ -10,6 +10,8 @@ public class CameraRotation : MonoBehaviour
 	public float maxYAngle = 90f; // Maximum vertical angle
 	public float minDistance = 2.0f; // Minimum distance to player
 	public float groundOffset = 0.2f; // Offset from ground to avoid clipping
+	public float minDistanceToWall = 0.1f; // Minimum distance between camera and wall
+	public float raycastSpreadAngle = 45f; // Angle to spread raycasts horizontally
 
 	private float mouseX, mouseY;
 
@@ -42,16 +44,24 @@ public class CameraRotation : MonoBehaviour
 		if (Physics.Raycast(player.position, -transform.forward, out hit, maxDistance, obstacleMask))
 		{
 			// If there's an obstacle, adjust desired position
-			float distanceToObstacle = Vector3.Distance(player.position, hit.point);
-
-			// If the distance to the obstacle is less than the minimum distance, move closer
-			if (distanceToObstacle < minDistance)
-			{
-				desiredPosition = player.position - transform.forward * minDistance;
-			}
+			float distanceToObstacle = Mathf.Max(hit.distance - minDistanceToWall, minDistance);
 
 			// Adjust desired position to be above ground
-			desiredPosition.y = hit.point.y + groundOffset;
+			desiredPosition = hit.point + transform.forward * distanceToObstacle;
+
+			// Spread raycasts horizontally to check for side obstacles
+			for (float angle = -raycastSpreadAngle; angle <= raycastSpreadAngle; angle += raycastSpreadAngle)
+			{
+				Vector3 direction = Quaternion.Euler(0, angle, 0) * -transform.forward;
+				if (Physics.Raycast(player.position, direction, out hit, maxDistance, obstacleMask))
+				{
+					float sideDistance = Vector3.Distance(player.position, hit.point);
+					if (sideDistance < distanceToObstacle)
+					{
+						desiredPosition = hit.point + transform.forward * minDistanceToWall; // Move slightly away from the wall
+					}
+				}
+			}
 		}
 
 		// Move the camera to the desired position
