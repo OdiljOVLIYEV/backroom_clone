@@ -65,14 +65,16 @@ public class PlayerRole : MonoBehaviourPun
 	[PunRPC]
 	public void RPC_OnKilled(string killedName)
 	{
+		isAlive = false; // bu playerning o‘zi uchun ham to‘g‘rilanadi
+
 		Debug.Log($"☠️ {killedName} o‘ldirildi (barchaga).");
 
-		// UI yangilash
 		PlayerListUI listUI = FindObjectOfType<PlayerListUI>();
 		if (listUI != null)
 		{
 			listUI.RefreshPlayerList();
 		}
 	}
+
 
 }

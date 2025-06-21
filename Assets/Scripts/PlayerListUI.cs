@@ -29,10 +29,11 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 			GameObject item = Instantiate(playerItemPrefab, listParent);
 
 			TMP_Text[] texts = item.GetComponentsInChildren<TMP_Text>();
+			TMP_Text nameText = texts[0];
+			TMP_Text roleText = texts[1];
+			TMP_Text statusText = texts[2];
 
-			TMP_Text nameText = texts[0];   // PlayerNameText
-			TMP_Text roleText = texts[1];   // RoleText
-			TMP_Text statusText = texts[2]; // StatusText (Tirik/O‘lik)
+			Button killButton = item.GetComponentInChildren<Button>(); // KillButton
 
 			nameText.text = player.NickName;
 			roleText.text = "NOMALUM";
@@ -42,31 +43,64 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 			{
 				if (pr.photonView.Owner == player)
 				{
-					// ROL: Faqat o‘ziga ko‘rsatiladi
+					// Faqat o‘z rolini ko‘rsatadi
 					if (player == PhotonNetwork.LocalPlayer)
 					{
-						roleText.text = pr.role.ToUpper(); // O‘z rolini ko‘rsatadi
+						roleText.text = pr.role.ToUpper();
 					}
 					else
 					{
-						roleText.text = "NOMALUM"; // Boshqalar yashirin
+						roleText.text = "NOMALUM";
 					}
 
-					// HOLAT: Hamma uchun ko‘rsatiladi
 					statusText.text = pr.isAlive ? "🟢 TIRIK" : "☠️ O‘LIK";
 
-					// Agar o‘lgan bo‘lsa, rangini kulga o‘zgartirish
 					if (!pr.isAlive)
 					{
 						nameText.color = Color.gray;
 						roleText.color = Color.gray;
 						statusText.color = Color.gray;
 					}
+
+					// 👉 KILL BUTTON LOGIC
+					// Faqat mafia va tirik bo‘lsa, boshqalarga tugmani ko‘rsat
+					PlayerRole myRole = GetMyPlayerRole();
+					if (myRole != null && myRole.role == "Mafia" && myRole.isAlive && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+					{
+						killButton.gameObject.SetActive(true);
+						Debug.Log("SIZ MAFIASIZ");
+
+						// Targetga Kill RPC yuborish
+						killButton.onClick.AddListener(() =>
+						{
+							pr.photonView.RPC("RPC_OnKilled", RpcTarget.All, pr.playerName);
+							pr.isAlive = false; // Lokal ravishda holatni yangilaymiz
+						});
+					}
+					else
+					{
+						Debug.Log("SIZ MAFIASIZ EMASSIZ");
+						killButton.gameObject.SetActive(false);
+					}
+
 					break;
 				}
 			}
 		}
 	}
+
+	// O‘z rolini olish uchun yordamchi funksiya
+	private PlayerRole GetMyPlayerRole()
+	{
+		PlayerRole[] roles = FindObjectsOfType<PlayerRole>();
+		foreach (var r in roles)
+		{
+			if (r.photonView.IsMine)
+				return r;
+		}
+		return null;
+	}
+
 
 
 
