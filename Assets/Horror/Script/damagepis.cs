@@ -47,7 +47,7 @@ public class damagepis : MonoBehaviour
     // Start is called on the frame when a script is enabled just before any of the Update methods is called the first time.
     void Start()
 	{
-		anim.keepAnimatorControllerStateOnDisable=true;
+		anim.keepAnimatorStateOnDisable=true;
 		ammo=FindObjectOfType<magazinpistolet>();
 		anim=GetComponent<Animator>();
 		anim.SetBool("changeweapon",true);

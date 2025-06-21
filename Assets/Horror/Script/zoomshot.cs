@@ -17,7 +17,7 @@ public class zoomshot : MonoBehaviour
     
     
 	{  
-		anim.keepAnimatorControllerStateOnDisable=true;
+		anim.keepAnimatorStateOnDisable=true;
 		press= true;
 		canshoot=true;
 	    anim= GetComponent<Animator>();

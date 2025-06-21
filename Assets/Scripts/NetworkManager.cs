@@ -44,7 +44,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     [Header("Join Random Room UI Panel")]
     public GameObject JoinRandomRoom_UI_Panel;
-
+    
+	public int maxPlayer;
 
 
     private Dictionary<string, RoomInfo> cachedRoomList;
@@ -108,7 +109,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
 
         RoomOptions roomOptions = new RoomOptions();
-        roomOptions.MaxPlayers = (byte)int.Parse(maxPlayerInputField.text);
+	    roomOptions.MaxPlayers = 8;
 
        
 
@@ -247,6 +248,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
             playerListGameobjects.Add(player.ActorNumber, playerListGameobject);
         }
+        
+	    CheckToEnableStartButton();
     }
 
 
@@ -276,7 +279,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
         }
 
-        playerListGameobjects.Add(newPlayer.ActorNumber, playerListGameobject);
+	    playerListGameobjects.Add(newPlayer.ActorNumber, playerListGameobject);
+	    CheckToEnableStartButton();
     }
 
 
@@ -299,7 +303,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         {
             startGameButton.SetActive(true);
         }
-
+	    CheckToEnableStartButton();
 
     }
 	public override void OnLeftRoom()
@@ -449,5 +453,17 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		}
 	}		
 		
+	private void CheckToEnableStartButton()
+	{
+		if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount == maxPlayer)
+		{
+			startGameButton.SetActive(true);
+		}
+		else
+		{
+			startGameButton.SetActive(false);
+		}
+	}
+
 
 }

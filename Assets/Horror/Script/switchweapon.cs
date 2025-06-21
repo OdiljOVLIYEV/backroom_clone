@@ -35,11 +35,11 @@ public class switchweapon : MonoBehaviour
 			anim2=FindObjectOfType<AKSshoot>();
 			aksweapon=false;
 			if(picselect!=null)
-				picselect.anim.keepAnimatorControllerStateOnDisable=true;
+				picselect.anim.keepAnimatorStateOnDisable=true;
 			if(anim!=null)
-				anim.anim.keepAnimatorControllerStateOnDisable=true;
+				anim.anim.keepAnimatorStateOnDisable=true;
 			if(anim2!=null)
-			anim2.anim.keepAnimatorControllerStateOnDisable=true;
+			anim2.anim.keepAnimatorStateOnDisable=true;
 		}
 
 		// This function is called every fixed framerate frame, if the MonoBehaviour is enabled.

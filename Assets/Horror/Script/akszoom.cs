@@ -12,7 +12,7 @@ public class akszoom : MonoBehaviour
     // Start is called before the first frame update
 	void Start()
     
-	{   anim.keepAnimatorControllerStateOnDisable=true;
+	{   anim.keepAnimatorStateOnDisable=true;
 		press= true;
 	    anim= GetComponent<Animator>();
 	}

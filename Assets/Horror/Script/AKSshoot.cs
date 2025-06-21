@@ -46,7 +46,7 @@ public class AKSshoot : MonoBehaviour
     // Start is called on the frame when a script is enabled just before any of the Update methods is called the first time.
     protected void Start()
 	{
-		anim.keepAnimatorControllerStateOnDisable=true;
+		anim.keepAnimatorStateOnDisable=true;
 		ammo=FindObjectOfType<magazinaks>();
 		canshoot=true;
 		anim=GetComponent<Animator>();
