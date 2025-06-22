@@ -61,6 +61,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 						ui.statusText.color = Color.gray;
 					}
 
+					// ... mavjud kod ichida:
 					PlayerRole myRole = GetMyPlayerRole();
 
 					if (myRole != null && myRole.role == "Mafia" && myRole.isAlive && pr.isAlive && player != PhotonNetwork.LocalPlayer)
@@ -73,6 +74,20 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 					{
 						ui.killButton.gameObject.SetActive(false);
 					}
+
+					// 👇 👇 👇 ✅ DOCTOR uchun HEAL BUTTON logic
+					// DOCTOR uchun HEAL BUTTON logic
+					if (myRole != null && myRole.role == "Doctor" && myRole.isAlive && pr.isAlive)
+					{
+						ui.healButton.gameObject.SetActive(true);
+						ui.healButton.onClick.RemoveAllListeners();
+						ui.healButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject));
+					}
+					else
+					{
+						ui.healButton.gameObject.SetActive(false);
+					}
+
 
 					break;
 				}

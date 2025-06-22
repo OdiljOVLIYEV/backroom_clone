@@ -8,4 +8,5 @@ public class PlayerListItemUI : MonoBehaviour
 	public TMP_Text roleText;
 	public TMP_Text statusText;
 	public Button killButton;
+	public Button healButton; 
 }

@@ -8,6 +8,7 @@ public class PlayerRole : MonoBehaviourPun
 	public string playerName; // O'yinchi ismi
 	public bool isAlive = true;
 	public bool isProtected = false;
+	bool hasHealed = false; 
 
 	// Start is called on the frame when a script is enabled just before any of the Update methods is called the first time.
 	protected void Start()
@@ -37,7 +38,14 @@ public class PlayerRole : MonoBehaviourPun
 
 		case "Doctor":
 			Debug.Log($"🛡️ {playerName} (Doctor) {targetRole.playerName} ni himoya qilmoqda.");
+			if (hasHealed)
+			{
+				Debug.Log("Doctor allaqachon davolagan.");
+				return;
+			}
+			
 			targetRole.Protect();
+			hasHealed = true;
 			break;
 
 		case "Komissar":
@@ -52,8 +60,16 @@ public class PlayerRole : MonoBehaviourPun
 
 	public void Protect()
 	{
-		isProtected = true;
+		photonView.RPC("RPC_Protect", RpcTarget.AllBuffered);
 	}
+
+	[PunRPC]
+	public void RPC_Protect()
+	{
+		isProtected = true;
+		Debug.Log($"{playerName} himoyaga olingan!");
+	}
+
 
 	public void Kill()
 	{
