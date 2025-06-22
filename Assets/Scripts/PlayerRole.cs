@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Photon.Pun;
+using ExitGames.Client.Photon;
 
 public class PlayerRole : MonoBehaviourPun
 {
@@ -7,6 +8,14 @@ public class PlayerRole : MonoBehaviourPun
 	public string playerName; // O'yinchi ismi
 	public bool isAlive = true;
 	public bool isProtected = false;
+
+	// Start is called on the frame when a script is enabled just before any of the Update methods is called the first time.
+	protected void Start()
+	{
+		// Player spawn qilgandan so'ng
+		
+
+	}
 
 	public void UseAbility(GameObject target)
 	{
@@ -48,31 +57,38 @@ public class PlayerRole : MonoBehaviourPun
 
 	public void Kill()
 	{
-		if (isProtected)
-		{
-			Debug.Log($"🛡️ {playerName} himoyalangan — o‘lmaydi.");
+		// Bu local funksiyani chaqirish emas, balki RPC orqali barcha clientlarga yuborish kerak
+		// Faqat masterclient yoki sender emas, butun tarmoqqa
+		photonView.RPC("RPC_DoKill", RpcTarget.AllBuffered);
+	}
+
+	[PunRPC]
+	public void RPC_DoKill()
+	{
+		if (isProtected) {
 			isProtected = false;
+			Debug.Log($"{playerName} himoyalangan.");
 			return;
 		}
 
 		isAlive = false;
 		Debug.Log($"☠️ {playerName} o‘ldirildi.");
-		photonView.RPC("RPC_OnKilled", RpcTarget.All, playerName);
-		// UI, animatsiya, disable qilishni bu yerda qo‘shing
-		//FindObjectOfType<PlayerListUI>().RefreshPlayerList();
-	}
-	
-	[PunRPC]
-	public void RPC_OnKilled(string killedName)
-	{
-		isAlive = false; // bu playerning o‘zi uchun ham to‘g‘rilanadi
 
-		Debug.Log($"☠️ {killedName} o‘ldirildi (barchaga).");
-
-		PlayerListUI listUI = FindObjectOfType<PlayerListUI>();
-		if (listUI != null)
+		if (photonView.IsMine)
 		{
-			listUI.RefreshPlayerList();
+			// Photon CustomProperties orqali ham yangilaymiz
+			Hashtable props = new Hashtable
+			{
+				{ "isAlive", false }
+			};
+			PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+		}
+
+		// UI-ni yangilash
+		PlayerListUI ui = FindObjectOfType<PlayerListUI>();
+		if (ui != null)
+		{
+			ui.RefreshPlayerList();
 		}
 	}
 

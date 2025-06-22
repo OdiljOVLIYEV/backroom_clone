@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
+using ExitGames.Client.Photon;
 
 public class PlayerListUI : MonoBehaviourPunCallbacks
 {
@@ -11,6 +12,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
 	private void Start()
 	{
+		PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { "isAlive", true } });
 		RefreshPlayerList();
 	}
 
@@ -37,7 +39,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
 			nameText.text = player.NickName;
 			roleText.text = "NOMALUM";
-			statusText.text = "HOLAT: ?";
+			//statusText.text = "HOLAT: ?";
 
 			foreach (PlayerRole pr in allRoles)
 			{
@@ -71,10 +73,9 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 						Debug.Log("SIZ MAFIASIZ");
 
 						// Targetga Kill RPC yuborish
-						killButton.onClick.AddListener(() =>
-						{
-							pr.photonView.RPC("RPC_OnKilled", RpcTarget.All, pr.playerName);
-							pr.isAlive = false; // Lokal ravishda holatni yangilaymiz
+						killButton.onClick.AddListener(() =>  
+						{  
+							pr.Kill(); // bu endi RPC orqali barcha clientlarga yuboriladi  
 						});
 					}
 					else
@@ -101,12 +102,16 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 		return null;
 	}
 
+	public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+	{
+		RefreshPlayerList();
+	}
 
 
 
 
 	// Kick funksiyasi faqat masterclientda ishlaydi
-	void KickPlayer(int actorNumber)
+	/*void KickPlayer(int actorNumber)
 	{
 		if (PhotonNetwork.IsMasterClient)
 		{
@@ -126,7 +131,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 				Debug.Log($"Player {playerToKick.NickName} kicked.");
 			}
 		}
-	}
+	}*/
 
 	// Har doim yangi player kelsa yoki ketsa ro'yxatni yangilaymiz
 	public override void OnPlayerEnteredRoom(Player newPlayer)

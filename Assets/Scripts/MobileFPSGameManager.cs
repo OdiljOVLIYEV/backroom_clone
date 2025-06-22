@@ -82,6 +82,7 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 			Debug.Log("Siz FUQARO bo‘ldingiz");
 			break;
 		}
+		
 	}
 
 	public override void OnLeftRoom()
