@@ -76,7 +76,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 			ui.protectButton.gameObject.SetActive(false);
 
 			// ➤ Faqat tunda tugmalar ko‘rinadi
-			if (PhaseManager.isNight && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+			if (myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
 			{
 				if (myRole.role == "Mafia")
 				{
@@ -103,7 +103,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 			}
 
 			// ➤ Doctor o‘zini faqat tunda himoya qilsin
-			if (PhaseManager.isNight && myRole != null && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
+			if (myRole != null && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
 			{
 				ui.protectButton.gameObject.SetActive(true);
 				ui.protectButton.onClick.RemoveAllListeners();

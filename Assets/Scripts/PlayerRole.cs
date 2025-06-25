@@ -23,7 +23,7 @@ public class PlayerRole : MonoBehaviourPun
 
 	public void UseAbility(GameObject target, string type)
 	{
-		if (!isAlive || !PhaseManager.isNight) return;
+		//if (!isAlive || !PhaseManager.isNight) return;
 
 		PlayerRole targetRole = target.GetComponent<PlayerRole>();
 		if (targetRole == null) return;
