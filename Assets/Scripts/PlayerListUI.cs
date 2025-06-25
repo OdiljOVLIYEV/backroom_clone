@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
@@ -6,207 +8,293 @@ using Photon.Realtime;
 using TMPro;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-
 public class PlayerListUI : MonoBehaviourPunCallbacks
 {
-	public GameObject playerItemPrefab;
-	public Transform listParent;
-	//public TextMeshProUGUI phaseText;
+    public GameObject playerItemPrefab;
+    public Transform listParent;
 
-	public float nightDuration = 30f;
-	public float dayDuration = 20f;
+    public float nightDuration = 30f;
+    public float dayDuration = 20f;
 
-	private static bool isNight = false;
+    private static bool isNight = false;
+    private bool hasVoted = false;
+    private Dictionary<string, int> voteCounts = new Dictionary<string, int>();
+    private Dictionary<string, string> voteLogs = new Dictionary<string, string>(); // voter -> voted
 
-	private void Start()
-	{
-		PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
+    private void Start()
+    {
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
+        RefreshPlayerList();
 
-		RefreshPlayerList();
+        StartCoroutine(GameLoop());
+    }
 
-		
-			StartCoroutine(GameLoop());
-		
-	}
+    IEnumerator GameLoop()
+    {
+        yield return new WaitForSeconds(2f);
 
-	IEnumerator GameLoop()
-	{
-		yield return new WaitForSeconds(2f);
+        while (true)
+        {
+            // 🌙 TUN
+            isNight = true;
+            hasVoted = false;
+            RefreshPlayerList();
+            yield return new WaitForSeconds(nightDuration);
 
-		while (true)
-		{
-			// 🌙 TUN BOSHLANDI
-			isNight = true;
-			//UpdatePhaseText();
-			RefreshPlayerList();
-			yield return new WaitForSeconds(nightDuration);
+            // ☀️ KUN
+            isNight = false;
+            hasVoted = false;
+            voteCounts.Clear();
+            voteLogs.Clear();
+            ResetNightAbilities();
+            RefreshPlayerList();
+            yield return new WaitForSeconds(dayDuration);
 
-			// ☀️ KUN BOSHLANDI
-			isNight = false;
-			ResetNightAbilities(); // barcha playerlarga
-			//UpdatePhaseText();
-			RefreshPlayerList();
-			yield return new WaitForSeconds(dayDuration);
-		}
-	}
+            // KUN TUGADI, OVOZLARNI HISOBLA
+            if (PhotonNetwork.IsMasterClient)
+            {
+                Player mostVoted = GetMostVotedPlayer();
+                if (mostVoted != null)
+                {
+                    photonView.RPC(nameof(EliminatePlayer), RpcTarget.All, mostVoted.ActorNumber);
+                }
+            }
+        }
+    }
 
-	/*private void UpdatePhaseText()
-	{
-		if (phaseText != null)
-		{
-			if (isNight)
-			{
-				phaseText.text = "🌙 TUN REJIMI";
-				phaseText.color = Color.cyan;
-			}
-			else
-			{
-				phaseText.text = "☀️ KUN REJIMI";
-				phaseText.color = Color.yellow;
-			}
-		}
-	}*/
+    private void ResetNightAbilities()
+    {
+        foreach (var pr in FindObjectsOfType<PlayerRole>())
+        {
+            pr.ResetNightAbilities();
+        }
+    }
 
-	private void ResetNightAbilities()
-	{
-		foreach (var pr in FindObjectsOfType<PlayerRole>())
-		{
-			pr.ResetNightAbilities();
-		}
-	}
+    public void RefreshPlayerList()
+    {
+        foreach (Transform child in listParent)
+            Destroy(child.gameObject);
 
-	public void RefreshPlayerList()
-	{
-		foreach (Transform child in listParent)
-			Destroy(child.gameObject);
+        PlayerRole[] allRoles = FindObjectsOfType<PlayerRole>();
+        PlayerRole myRole = GetMyPlayerRole();
 
-		PlayerRole[] allRoles = FindObjectsOfType<PlayerRole>();
-		PlayerRole myRole = GetMyPlayerRole();
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            GameObject item = Instantiate(playerItemPrefab, listParent);
+            PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
+            if (ui == null) continue;
 
-		foreach (Player player in PhotonNetwork.PlayerList)
-		{
-			GameObject item = Instantiate(playerItemPrefab, listParent);
-			PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
+            ui.nameText.text = player.NickName;
+            PlayerRole pr = System.Array.Find(allRoles, r => r.photonView.Owner == player);
 
-			if (ui == null)
-			{
-				Debug.LogError("⚠️ PlayerListItemUI topilmadi.");
-				Destroy(item);
-				continue;
-			}
+            if (pr != null)
+            {
+                ui.statusText.text = pr.isAlive ? "🟢 TIRIK" : "☠️ O‘LIK";
 
-			ui.nameText.text = player.NickName;
+                if (!pr.isAlive)
+                {
+                    ui.nameText.color = Color.gray;
+                    ui.roleText.color = Color.gray;
+                    ui.statusText.color = Color.gray;
+                }
 
-			// === ROLE HOLATI ===
-			PlayerRole pr = System.Array.Find(allRoles, r => r.photonView.Owner == player);
-			if (pr != null)
-			{
-				ui.statusText.text = pr.isAlive ? "🟢 TIRIK" : "☠️ O‘LIK";
+                if (player == PhotonNetwork.LocalPlayer)
+                    ui.roleText.text = myRole.role.ToUpper();
+                else if (!pr.isAlive)
+                {
+                    ui.roleText.text = pr.role.ToUpper();
+                    ui.roleText.color = Color.red;
+                }
+                else
+                    ui.roleText.text = "NOMALUM";
+            }
 
-				if (!pr.isAlive)
-				{
-					ui.nameText.color = Color.gray;
-					ui.roleText.color = Color.gray;
-					ui.statusText.color = Color.gray;
-				}
+            if (!isNight && voteCounts.TryGetValue(player.ActorNumber.ToString(), out int votes))
+            {
+                ui.statusText.text += $" | 🗳️ {votes} ovoz";
+            }
 
-				if (player == PhotonNetwork.LocalPlayer)
-					ui.roleText.text = myRole.role.ToUpper();
-				else if (!pr.isAlive)
-				{
-					ui.roleText.text = pr.role.ToUpper();
-					ui.roleText.color = Color.red;
-				}
-				else
-					ui.roleText.text = "NOMALUM";
-			}
+            ui.MafiakillButton.gameObject.SetActive(false);
+            ui.killButton.gameObject.SetActive(false);
+            ui.investigateButton.gameObject.SetActive(false);
+            ui.protectButton.gameObject.SetActive(false);
+            ui.voteButton.gameObject.SetActive(false);
 
-			// === BUTTON YASHIRISH ===
-			ui.MafiakillButton.gameObject.SetActive(false);
-			ui.killButton.gameObject.SetActive(false);
-			ui.investigateButton.gameObject.SetActive(false);
-			ui.protectButton.gameObject.SetActive(false);
+            if (isNight && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+            {
+                switch (myRole.role.ToLower())
+                {
+                    case "mafia":
+                        ui.MafiakillButton.gameObject.SetActive(true);
+                        ui.MafiakillButton.onClick.RemoveAllListeners();
+                        ui.MafiakillButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "kill"));
+                        break;
+                    case "komissar":
+                        ui.killButton.gameObject.SetActive(true);
+                        ui.killButton.onClick.RemoveAllListeners();
+                        ui.killButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "kill"));
 
-			// === TUNDA KO‘RSATISH ===
-			if (isNight && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
-			{
-				switch (myRole.role.Trim().ToLower())
-				{
-					case "mafia":
-						ui.MafiakillButton.gameObject.SetActive(true);
-						ui.MafiakillButton.onClick.RemoveAllListeners();
-						ui.MafiakillButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "kill"));
-						break;
+                        ui.investigateButton.gameObject.SetActive(true);
+                        ui.investigateButton.onClick.RemoveAllListeners();
+                        ui.investigateButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "investigate"));
+                        break;
+                    case "doctor":
+                        ui.protectButton.gameObject.SetActive(true);
+                        ui.protectButton.onClick.RemoveAllListeners();
+                        ui.protectButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "protect"));
+                        break;
+                }
+            }
 
-					case "komissar":
-						ui.killButton.gameObject.SetActive(true);
-						ui.killButton.onClick.RemoveAllListeners();
-						ui.killButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "kill"));
+            // Doctor o‘zini faqat tunda himoya qiladi
+            if (isNight && myRole != null && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
+            {
+                ui.protectButton.gameObject.SetActive(true);
+                ui.protectButton.onClick.RemoveAllListeners();
+                ui.protectButton.onClick.AddListener(() => myRole.UseAbility(myRole.gameObject, "protect"));
+            }
 
-						ui.investigateButton.gameObject.SetActive(true);
-						ui.investigateButton.onClick.RemoveAllListeners();
-						ui.investigateButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "investigate"));
-						break;
+            // KUN REJIMI OVOZ BERISH
+            if (!isNight && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+            {
+                ui.voteButton.gameObject.SetActive(true);
+                ui.voteButton.onClick.RemoveAllListeners();
+                ui.voteButton.onClick.AddListener(() => CastVote(player));
+            }
+        }
 
-					case "doctor":
-						ui.protectButton.gameObject.SetActive(true);
-						ui.protectButton.onClick.RemoveAllListeners();
-						ui.protectButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "protect"));
-						break;
-				}
-			}
+        // Debug ovoz loglari
+        if (!isNight && voteLogs.Count > 0)
+        {
+            Debug.Log("\n📋 Ovozlar:");
+            foreach (var log in voteLogs)
+            {
+                Debug.Log($"🗳️ {log.Key} ➡️ {log.Value}");
+            }
+        }
+    }
 
-			// === Doctor o‘zini tunda himoya qilsin ===
-			if (isNight && myRole != null && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
-			{
-				ui.protectButton.gameObject.SetActive(true);
-				ui.protectButton.onClick.RemoveAllListeners();
-				ui.protectButton.onClick.AddListener(() => myRole.UseAbility(myRole.gameObject, "protect"));
-			}
-		}
-	}
+    void CastVote(Player votedPlayer)
+    {
+        if (hasVoted || votedPlayer == null) return;
+        hasVoted = true;
 
-	private PlayerRole GetMyPlayerRole()
-	{
-		foreach (var r in FindObjectsOfType<PlayerRole>())
-			if (r.photonView.IsMine)
-				return r;
-		return null;
-	}
+        string votedKey = votedPlayer.ActorNumber.ToString();
+        string voterName = PhotonNetwork.LocalPlayer.NickName;
+        string votedName = votedPlayer.NickName;
 
-	public void ShowInvestigationResult(Player investigatedPlayer, string revealedRole)
-	{
-		foreach (Transform child in listParent)
-		{
-			PlayerListItemUI ui = child.GetComponent<PlayerListItemUI>();
-			if (ui == null) continue;
+        Debug.Log($"🗳️ {voterName} ovoz berdi ➡️ {votedName}");
 
-			if (ui.nameText.text == investigatedPlayer.NickName)
-			{
-				PlayerRole myRole = GetMyPlayerRole();
-				if (myRole != null && myRole.role == "Komissar" && myRole.photonView.IsMine)
-				{
-					ui.roleText.text = revealedRole.ToUpper();
-					ui.roleText.color = Color.yellow;
-				}
-				break;
-			}
-		}
-	}
+        // ❌ Boshqa script topmasdan to'g'ridan-to'g'ri o‘zining photonView dan RPC yuboriladi
+        photonView.RPC(nameof(RegisterVote), RpcTarget.MasterClient, votedKey, voterName, votedName);
+    }
 
-	public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
 
-	{
-		RefreshPlayerList();
-	}
+    [PunRPC]
+    void RegisterVote(string votedActorNumberStr, string voterName, string votedName)
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Debug.LogWarning("❌ RegisterVote faqat MasterClientda ishlaydi.");
+            return;
+        }
 
-	public override void OnPlayerEnteredRoom(Player newPlayer)
-	{
-		RefreshPlayerList();
-	}
+        if (string.IsNullOrEmpty(votedActorNumberStr))
+        {
+            Debug.LogError("❌ RegisterVote: votedActorNumberStr bo‘sh.");
+            return;
+        }
 
-	public override void OnPlayerLeftRoom(Player otherPlayer)
-	{
-		RefreshPlayerList();
-	}
+        if (!voteCounts.ContainsKey(votedActorNumberStr))
+            voteCounts[votedActorNumberStr] = 0;
+
+        voteCounts[votedActorNumberStr]++;
+
+        voteLogs[voterName] = votedName;
+
+        Debug.Log($"✅ MasterClient: {voterName} ➡️ {votedName} ga ovoz berdi. Jami: {voteCounts[votedActorNumberStr]}");
+    }
+
+    Player GetMostVotedPlayer()
+    {
+        if (voteCounts.Count == 0) return null;
+
+        string maxVotedKey = null;
+        int maxVotes = 0;
+
+        foreach (var kvp in voteCounts)
+        {
+            if (kvp.Value > maxVotes)
+            {
+                maxVotes = kvp.Value;
+                maxVotedKey = kvp.Key;
+            }
+        }
+
+        if (int.TryParse(maxVotedKey, out int actorNumber))
+        {
+            return PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+        }
+
+        return null;
+    }
+
+    [PunRPC]
+    void EliminatePlayer(int actorNumber)
+    {
+        foreach (var pr in FindObjectsOfType<PlayerRole>())
+        {
+            if (pr.photonView.OwnerActorNr == actorNumber)
+            {
+                pr.isAlive = false;
+                Debug.Log($"❌ {pr.photonView.Owner.NickName} osildi.");
+                break;
+            }
+        }
+
+        RefreshPlayerList();
+    }
+
+    private PlayerRole GetMyPlayerRole()
+    {
+        foreach (var r in FindObjectsOfType<PlayerRole>())
+            if (r.photonView.IsMine)
+                return r;
+        return null;
+    }
+
+    public void ShowInvestigationResult(Player investigatedPlayer, string revealedRole)
+    {
+        foreach (Transform child in listParent)
+        {
+            PlayerListItemUI ui = child.GetComponent<PlayerListItemUI>();
+            if (ui == null) continue;
+
+            if (ui.nameText.text == investigatedPlayer.NickName)
+            {
+                PlayerRole myRole = GetMyPlayerRole();
+                if (myRole != null && myRole.role == "Komissar" && myRole.photonView.IsMine)
+                {
+                    ui.roleText.text = revealedRole.ToUpper();
+                    ui.roleText.color = Color.yellow;
+                }
+                break;
+            }
+        }
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        RefreshPlayerList();
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        RefreshPlayerList();
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        RefreshPlayerList();
+    }
 }

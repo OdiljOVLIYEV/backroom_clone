@@ -11,4 +11,6 @@ public class PlayerListItemUI : MonoBehaviour
 	public Button killButton;
 	public Button investigateButton;
 	public Button protectButton; 
+	public Button voteButton;
+
 }
