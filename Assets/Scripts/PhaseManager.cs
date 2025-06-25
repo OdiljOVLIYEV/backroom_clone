@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Obvious.Soap;
 using UnityEngine;
 using Photon.Pun;
 
@@ -8,7 +9,7 @@ public class PhaseManager : MonoBehaviourPun
 
 	public float nightDuration = 30f;
 	public float dayDuration = 20f;
-
+	
 	private void Start()
 	{
 		
