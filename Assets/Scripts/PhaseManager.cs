@@ -1,66 +1,100 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;  // PhotonNetwork uchun kerak
+using Photon.Pun;
 
 public class PhaseManager : MonoBehaviourPun
 {
+	public static bool isNight = false;
+
+	public float nightDuration = 30f;
+	public float dayDuration = 20f;
+
 	private void Start()
 	{
+		
+		
 		if (PhotonNetwork.IsMasterClient)
 		{
-			StartCoroutine(PrintAliveCountRoutine());
+			StartCoroutine(GameLoop());
+		}
+		
+	}
+
+	IEnumerator GameLoop()
+	{
+		yield return new WaitForSeconds(2f);
+
+		while (true)
+		{
+			// 🌙 TUN
+			photonView.RPC(nameof(RPC_StartNight), RpcTarget.All);
+			yield return StartCoroutine(RunTimer(nightDuration));
+			photonView.RPC(nameof(RPC_EndNight), RpcTarget.All);
+
+			// ☀️ KUN
+			yield return StartCoroutine(RunTimer(dayDuration));
 		}
 	}
 
-	IEnumerator PrintAliveCountRoutine()
+	IEnumerator RunTimer(float seconds)
 	{
-		while (true)
+		float timer = seconds;
+		while (timer > 0)
 		{
-			PrintAlivePlayersCount();
-			yield return new WaitForSeconds(5f);
+			if (PhotonNetwork.IsMasterClient)
+			{
+				photonView.RPC(nameof(RPC_LogMessage), RpcTarget.All, $"⏱️ {Mathf.Ceil(timer)} soniya qoldi.");
+			}
+			yield return new WaitForSeconds(1f);
+			timer -= 1f;
 		}
+	}
+
+	[PunRPC]
+	void RPC_StartNight()
+	{
+		PhaseManager.isNight = true;
+		StartCoroutine(DelayedRefreshUI());
+	}
+
+	[PunRPC]
+	void RPC_EndNight()
+	{
+		PhaseManager.isNight = false;
+
+		// 🔁 Barcha o'yinchilarni reset qilish
+		foreach (var role in FindObjectsOfType<PlayerRole>())
+		{
+			role.ResetNightAbilities();  // Bu allaqachon sizda mavjud
+		}
+		
+
+		StartCoroutine(DelayedRefreshUI());
+	}
+
+
+
+	IEnumerator DelayedRefreshUI()
+	{
+		yield return new WaitForSeconds(0.1f);
+		var ui = FindObjectOfType<PlayerListUI>();
+		if (ui != null) ui.RefreshPlayerList(); // <== MUHIM
+	}
+
+
+	[PunRPC]
+	public void RPC_LogMessage(string message)
+	{
+		Debug.Log(message);
 	}
 
 	public void PrintAlivePlayersCount()
 	{
-		PlayerRole[] allPlayers = FindObjectsOfType<PlayerRole>();
-		int aliveCount = 0;
-
-		foreach (PlayerRole pr in allPlayers)
+		int alive = 0;
+		foreach (var pr in FindObjectsOfType<PlayerRole>())
 		{
-			if (pr.isAlive)
-				aliveCount++;
+			if (pr.isAlive) alive++;
 		}
-
-		Debug.Log("Hozircha tirik o'yinchilar soni: " + aliveCount);
-	}
-
-	public void StartNightPhase()
-	{
-		// Har bir rol o‘z harakatini qiladi
-		Debug.Log("Night phase started — mafia, doctor, komissar harakat qiladi.");
-	}
-
-	public void EndNightPhase()
-	{
-		if (PhotonNetwork.IsMasterClient)
-		{
-			StartCoroutine(PrintAliveCountRoutine());
-		}
-		// Natijalarni qayta ishlash
-		Debug.Log("Night phase ended.");
-	}
-
-	public void StartVotingPhase()
-	{
-		// Ovozlar ochiladi
-		Debug.Log("Voting started — kimdir chiqariladi.");
-	}
-
-	public void EndVotingPhase()
-	{
-		// Eng ko‘p ovoz olgan o‘yinchi chiqariladi
-		Debug.Log("Voting ended.");
+		Debug.Log("📊 Tiriklik soni: " + alive);
 	}
 }

@@ -4,27 +4,26 @@ using ExitGames.Client.Photon;
 
 public class PlayerRole : MonoBehaviourPun
 {
-	public string role; // Mafia, Doctor, Komissar, Citizen
-	public string playerName; // O'yinchi ismi
+	public string role;
+	public string playerName;
 	public bool isAlive = true;
 	public bool isProtected = false;
-	bool hasHealed = false; 
 
-	// Start is called on the frame when a script is enabled just before any of the Update methods is called the first time.
-	protected void Start()
+	private bool hasAttacked = false;
+	private bool hasHealed = false;
+	private bool hasUsedAbilityThisNight = false;
+
+	private void Start()
 	{
-		// Player spawn qilgandan so'ng
-		
-
+		if (photonView.IsMine)
+		{
+			playerName = PhotonNetwork.NickName;
+		}
 	}
 
-	public void UseAbility(GameObject target)
+	public void UseAbility(GameObject target, string type)
 	{
-		if (!isAlive)
-		{
-			Debug.Log($"{playerName} o‘lgani uchun qobiliyat ishlamaydi.");
-			return;
-		}
+		if (!isAlive || !PhaseManager.isNight) return;
 
 		PlayerRole targetRole = target.GetComponent<PlayerRole>();
 		if (targetRole == null) return;
@@ -32,81 +31,81 @@ public class PlayerRole : MonoBehaviourPun
 		switch (role)
 		{
 		case "Mafia":
-			Debug.Log($"🔫 {playerName} (Mafia) {targetRole.playerName} ni nishonga oldi.");
-			targetRole.Kill();
+			if (type == "kill" && !hasAttacked)
+			{
+				targetRole.ReceiveKill();
+				hasAttacked = true;
+			}
 			break;
 
 		case "Doctor":
-			Debug.Log($"🛡️ {playerName} (Doctor) {targetRole.playerName} ni himoya qilmoqda.");
-			if (hasHealed)
+			if (type == "protect" && !hasHealed)
 			{
-				Debug.Log("Doctor allaqachon davolagan.");
-				return;
+				targetRole.ReceiveProtect();
+				hasHealed = true;
 			}
-			
-			targetRole.Protect();
-			hasHealed = true;
 			break;
 
 		case "Komissar":
-			Debug.Log($"🔍 {playerName} (Komissar) {targetRole.playerName} roli: {targetRole.role}");
-			break;
-
-		case "Citizen":
-			Debug.Log($"📛 {playerName} (Citizen) da qobiliyat yo‘q.");
+			if (!hasUsedAbilityThisNight)
+			{
+				if (type == "kill")
+				{
+					targetRole.ReceiveKill();
+					hasUsedAbilityThisNight = true;
+				}
+				else if (type == "investigate")
+				{
+					if (photonView.IsMine)
+					{
+						FindObjectOfType<PlayerListUI>()?.ShowInvestigationResult(targetRole.photonView.Owner, targetRole.role);
+					}
+					hasUsedAbilityThisNight = true;
+				}
+			}
 			break;
 		}
 	}
 
-	public void Protect()
+	public void ReceiveProtect()
 	{
-		photonView.RPC("RPC_Protect", RpcTarget.AllBuffered);
+		photonView.RPC(nameof(RPC_SetProtected), RpcTarget.AllBuffered);
 	}
 
 	[PunRPC]
-	public void RPC_Protect()
+	void RPC_SetProtected()
 	{
 		isProtected = true;
-		Debug.Log($"{playerName} himoyaga olingan!");
 	}
 
-
-	public void Kill()
+	public void ReceiveKill()
 	{
-		// Bu local funksiyani chaqirish emas, balki RPC orqali barcha clientlarga yuborish kerak
-		// Faqat masterclient yoki sender emas, butun tarmoqqa
-		photonView.RPC("RPC_DoKill", RpcTarget.AllBuffered);
+		photonView.RPC(nameof(RPC_DoKill), RpcTarget.AllBuffered);
 	}
 
 	[PunRPC]
-	public void RPC_DoKill()
+	void RPC_DoKill()
 	{
-		if (isProtected) {
+		if (isProtected)
+		{
 			isProtected = false;
-			Debug.Log($"{playerName} himoyalangan.");
 			return;
 		}
 
 		isAlive = false;
-		Debug.Log($"☠️ {playerName} o‘ldirildi.");
-
 		if (photonView.IsMine)
 		{
-			// Photon CustomProperties orqali ham yangilaymiz
-			Hashtable props = new Hashtable
-			{
-				{ "isAlive", false }
-			};
-			PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+			PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { "isAlive", false } });
 		}
 
-		// UI-ni yangilash
-		PlayerListUI ui = FindObjectOfType<PlayerListUI>();
-		if (ui != null)
-		{
-			ui.RefreshPlayerList();
-		}
+		FindObjectOfType<PlayerListUI>()?.RefreshPlayerList();
 	}
 
-
+	public void ResetNightAbilities()
+	{
+		hasAttacked = false;
+		hasHealed = false;
+		hasUsedAbilityThisNight = false;
+		isProtected = false;
+	}
 }
