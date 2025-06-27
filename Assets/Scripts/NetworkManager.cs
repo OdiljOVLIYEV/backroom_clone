@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 using System.Collections.Generic;
+using Obvious.Soap;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
@@ -44,8 +45,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     [Header("Join Random Room UI Panel")]
     public GameObject JoinRandomRoom_UI_Panel;
-    
-	public int maxPlayer;
+    public IntVariable MaxPlayer;
+	private int maxPlayer;
 
 
     private Dictionary<string, RoomInfo> cachedRoomList;
@@ -58,6 +59,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     private void Start()
     {
+        maxPlayer = MaxPlayer.Value;
         ActivatePanel(Login_UI_Panel.name);
 
         cachedRoomList = new Dictionary<string, RoomInfo>();

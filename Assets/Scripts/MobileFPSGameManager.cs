@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Obvious.Soap;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
@@ -15,10 +16,13 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 	
    
 	public Transform[] spawnPoints;
-	public int maxplayer;
+	public IntVariable MaxPlayer;
+	private int maxplayer;
 
 	private void Start()
 	{
+		maxplayer = MaxPlayer.Value;
+		
 		if (PhotonNetwork.IsMasterClient)
 		{
 			StartCoroutine(AssignRolesAfterDelay());
