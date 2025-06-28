@@ -13,6 +13,11 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     public GameObject playerItemPrefab;
     public Transform listParent;
     public Text name;
+    public TMP_Text timerText;
+    public Image nightImage;
+    public Image dayImage;
+     // 🔹 Yangi prefab: har bir xabar uchun
+
     public bool enableNight = true;
     public bool enableDay = true;
 
@@ -24,6 +29,9 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     private Dictionary<string, int> voteCounts = new Dictionary<string, int>();
     private Dictionary<string, string> voteLogs = new Dictionary<string, string>(); // voter -> voted
 
+    private List<Player> pendingKills = new List<Player>();
+    private List<Player> pendingSaves = new List<Player>();
+    private List<string> nightEvents = new List<string>();
     private void Start()
     {
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
@@ -48,12 +56,19 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             {
                 isNight = true;
                 hasVoted = false;
+                nightEvents.Clear();
+                pendingKills.Clear();
+                pendingSaves.Clear();
+
                 RefreshPlayerList();
-                yield return new WaitForSeconds(nightDuration);
-            }
-            else
-            {
-                yield return null; // agar tun o‘chirilgan bo‘lsa kutadi
+
+                float timeLeft = nightDuration;
+                while (timeLeft > 0f)
+                {
+                    timerText.text = Mathf.CeilToInt(timeLeft).ToString("00");
+                    yield return new WaitForSeconds(1f);
+                    timeLeft -= 1f;
+                }
             }
 
             // ☀️ KUN
@@ -64,39 +79,94 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 voteCounts.Clear();
                 voteLogs.Clear();
                 ResetNightAbilities();
-                RefreshPlayerList();
-                yield return new WaitForSeconds(dayDuration);
 
-                // 📊 Ovozlar
+                ShowNightResults();
+                RefreshPlayerList();
+
+                float timeLeft = dayDuration;
+                while (timeLeft > 0f)
+                {
+                    timerText.text = Mathf.CeilToInt(timeLeft).ToString("00");
+                    yield return new WaitForSeconds(1f);
+                    timeLeft -= 1f;
+                }
+
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    Debug.Log("📊 Ovoz natijalari:");
-                    foreach (var kvp in voteCounts)
-                    {
-                        var player = PhotonNetwork.CurrentRoom.GetPlayer(int.Parse(kvp.Key));
-                        string name = player != null ? player.NickName : "???";
-                        Debug.Log($"➡️ {name}: {kvp.Value} ovoz");
-                    }
-
                     Player mostVoted = GetMostVotedPlayer();
                     if (mostVoted != null)
                     {
                         photonView.RPC(nameof(EliminatePlayer), RpcTarget.All, mostVoted.ActorNumber);
                     }
-                    else
-                    {
-                        Debug.Log("❌ Hech kim o‘ldirilmaydi (teng yoki yo‘q ovoz).");
-                    }
                 }
             }
-            else
-            {
-                yield return null; // agar kun o‘chirilgan bo‘lsa kutadi
-            }
+
+            yield return null;
         }
     }
 
 
+
+
+
+    void ShowNightResults()
+    {
+        Debug.Log($"[ShowNightResults] 🔔 TUN NATIJALARI: {pendingKills.Count} kill, {pendingSaves.Count} save");
+        Debug.Log($"[ShowNightResults] ✅ Mastermi: {PhotonNetwork.IsMasterClient}");
+
+        foreach (Player target in pendingKills)
+        {
+            if (pendingSaves.Contains(target))
+            {
+                Debug.Log($"[ShowNightResults] 🛡️ {target.NickName} doctor tomonidan saqlandi");
+               
+            }
+            else
+            {
+                Debug.Log($"[ShowNightResults] ☠️ {target.NickName} o‘ldirildi");
+              
+                photonView.RPC(nameof(EliminatePlayer), RpcTarget.All, target.ActorNumber);
+            }
+        }
+
+        // 🔻 Ana endi bu yerga qo‘shing:
+        foreach (var message in nightEvents)
+        {
+            Debug.Log($"[ShowNightResults] 📜 Extra night event: {message}");
+            
+        }
+    }
+
+
+
+   
+
+
+
+    public void AddPendingKill(Player player)
+    {
+        if (!pendingKills.Contains(player))
+        {
+            pendingKills.Add(player);
+            Debug.Log($"[AddPendingKill] ☠️ Pending kill qo‘shildi: {player.NickName}");
+        }
+        else
+        {
+            Debug.Log($"[AddPendingKill] ⏩ {player.NickName} allaqachon pending listda.");
+        }
+    }
+
+
+    public void AddPendingSave(Player player)
+    {
+        if (!pendingSaves.Contains(player))
+            pendingSaves.Add(player);
+    }
+
+    public void AddNightEvent(string msg)
+    {
+        nightEvents.Add(msg);
+    }
 
     private void ResetNightAbilities()
     {
@@ -164,6 +234,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                         ui.MafiakillButton.gameObject.SetActive(true);
                         ui.MafiakillButton.onClick.RemoveAllListeners();
                         ui.MafiakillButton.onClick.AddListener(() => myRole.UseAbility(pr.gameObject, "kill"));
+                        
                         break;
                     case "komissar":
                         ui.killButton.gameObject.SetActive(true);
@@ -209,7 +280,13 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             }
         }
     }
-
+    public Player GetPhotonPlayerByName(string name)
+    {
+        foreach (var p in PhotonNetwork.PlayerList)
+            if (p.NickName == name)
+                return p;
+        return null;
+    }
     void CastVote(Player votedPlayer)
     {
         if (hasVoted || votedPlayer == null) return;
@@ -279,7 +356,6 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         return null;
     }
 
-
     [PunRPC]
     void EliminatePlayer(int actorNumber)
     {
@@ -288,13 +364,14 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             if (pr.photonView.OwnerActorNr == actorNumber)
             {
                 pr.isAlive = false;
-                Debug.Log($"❌ {pr.photonView.Owner.NickName} osildi.");
+                Debug.Log($"[EliminatePlayer] ❌ {pr.photonView.Owner.NickName} o‘ldirildi va status o‘zgartirildi.");
                 break;
             }
         }
 
         RefreshPlayerList();
     }
+
 
     private PlayerRole GetMyPlayerRole()
     {
@@ -324,6 +401,34 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
+    public void RPC_AddPendingKill(int actorNumber)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        Player p = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+        if (p != null && !pendingKills.Contains(p))
+        {
+            pendingKills.Add(p);
+            Debug.Log($"[RPC_AddPendingKill] ☠️ {p.NickName} pending kill listga qo‘shildi.");
+        }
+    }
+
+
+    [PunRPC]
+    public void RPC_AddPendingSave(int actorNumber)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        Player p = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+        if (p != null && !pendingSaves.Contains(p))
+        {
+            pendingSaves.Add(p);
+            Debug.Log($"[RPC_AddPendingSave] 🛡️ {p.NickName} pending save listga qo‘shildi.");
+        }
+    }
+
+
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
         RefreshPlayerList();
@@ -338,4 +443,6 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     {
         RefreshPlayerList();
     }
+    
+    
 }

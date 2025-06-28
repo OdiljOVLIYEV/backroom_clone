@@ -9,12 +9,11 @@ public class Player_Setup : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     [SerializeField]
     GameObject FPScamera;
-	/* [SerializeField]
-    GameObject attack;
-    public GameObject axedamage;
-    public GameObject WEAPON_PICK;
-    public GameObject[] Fpsview;
-	public GameObject[] Tpsview;*/
+	//[SerializeField]
+   // GameObject attack;
+   
+    //public GameObject[] Fpsview;
+	//public GameObject[] Tpsview;*/
     
  
    // public Camera fps;
@@ -28,7 +27,7 @@ public class Player_Setup : MonoBehaviourPunCallbacks
 	     if (photonView.IsMine)
         {
           
-            
+           
            
 		     //transform.GetComponent<PlayerMovment>().enabled = true; 
 		     FPScamera.GetComponent<Camera>().enabled = true;
@@ -47,7 +46,7 @@ public class Player_Setup : MonoBehaviourPunCallbacks
 	       // transform.GetComponent<flashOn>().enabled = false;
 	        FPScamera.GetComponent<MouseLook>().enabled = false;
 	       // transform.GetComponent<PlayerHealt>().enabled = false; 
-            
+	     
         }
 	 
 

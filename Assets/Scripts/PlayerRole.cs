@@ -1,111 +1,168 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
+using TMPro;
 
 public class PlayerRole : MonoBehaviourPun
 {
-	public string role;
-	public string playerName;
-	public bool isAlive = true;
-	public bool isProtected = false;
+    public string role;
+    public string playerName;
+    public bool isAlive = true;
+    public bool isProtected = false;
 
-	private bool hasAttacked = false;
-	private bool hasHealed = false;
-	private bool hasUsedAbilityThisNight = false;
+    private bool hasAttacked = false;
+    private bool hasHealed = false;
+    private bool hasUsedAbilityThisNight = false;
+   
+    private void Start()
+    {
+        if (photonView.IsMine)
+        {
+            playerName = PhotonNetwork.NickName;
+        }
+    }
 
-	private void Start()
-	{
-		if (photonView.IsMine)
-		{
-			playerName = PhotonNetwork.NickName;
-		}
-	}
+  public void UseAbility(GameObject target, string type)
+{
+    if (!isAlive) return;
 
-	public void UseAbility(GameObject target, string type)
-	{
-		//if (!isAlive || !PhaseManager.isNight) return;
+    PlayerRole targetRole = target.GetComponent<PlayerRole>();
+    if (targetRole == null) return;
 
-		PlayerRole targetRole = target.GetComponent<PlayerRole>();
-		if (targetRole == null) return;
+    var playerListUI = FindObjectOfType<PlayerListUI>();
 
-		switch (role)
-		{
-		case "Mafia":
-			if (type == "kill" && !hasAttacked)
-			{
-				targetRole.ReceiveKill();
-				hasAttacked = true;
-			}
-			break;
+    switch (role)
+    {
+        case "Mafia":
+            if (type == "kill" && !hasAttacked)
+            {
+                photonView.RPC("MafiaMessage", RpcTarget.All);
+                targetRole.ReceiveKill();
+               
+                hasAttacked = true;
+            }
+            break;
 
-		case "Doctor":
-			if (type == "protect" && !hasHealed)
-			{
-				targetRole.ReceiveProtect();
-				hasHealed = true;
-			}
-			break;
+        case "Doctor":
+            if (type == "protect" && !hasHealed)
+            {
+                photonView.RPC("DoctorMessage", RpcTarget.All);
+                targetRole.ReceiveProtect();
+               
+                hasHealed = true;
+            }
+            break;
 
-		case "Komissar":
-			if (!hasUsedAbilityThisNight)
-			{
-				if (type == "kill")
-				{
-					targetRole.ReceiveKill();
-					hasUsedAbilityThisNight = true;
-				}
-				else if (type == "investigate")
-				{
-					if (photonView.IsMine)
-					{
-						FindObjectOfType<PlayerListUI>()?.ShowInvestigationResult(targetRole.photonView.Owner, targetRole.role);
-					}
-					hasUsedAbilityThisNight = true;
-				}
-			}
-			break;
-		}
-	}
+        case "Komissar":
+            if (!hasUsedAbilityThisNight)
+            {
+                if (type == "kill")
+                {
+                    photonView.RPC("KomissarKillMessage", RpcTarget.All);
+                    targetRole.ReceiveKill();
+                   
+                }
+                else if (type == "investigate")
+                {
+                    photonView.RPC("KomissarInvestigateMessage", RpcTarget.All);
+                    if (photonView.IsMine)
+                        playerListUI.ShowInvestigationResult(targetRole.photonView.Owner, targetRole.role);
+                }
 
-	public void ReceiveProtect()
-	{
-		photonView.RPC(nameof(RPC_SetProtected), RpcTarget.AllBuffered);
-	}
+                hasUsedAbilityThisNight = true;
+            }
+            break;
+    }
+}
 
-	[PunRPC]
-	void RPC_SetProtected()
-	{
-		isProtected = true;
-	}
+   
+  
 
-	public void ReceiveKill()
-	{
-		photonView.RPC(nameof(RPC_DoKill), RpcTarget.AllBuffered);
-	}
+   
+  
 
-	[PunRPC]
-	void RPC_DoKill()
-	{
-		if (isProtected)
-		{
-			isProtected = false;
-			return;
-		}
+   
+    public void ReceiveProtect()
+    {
+        Debug.Log($"[{role}] 🛡️ {playerName} himoyalandi.");
+        photonView.RPC(nameof(RPC_SetProtected), RpcTarget.AllBuffered);
+    }
 
-		isAlive = false;
-		if (photonView.IsMine)
-		{
-			PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { "isAlive", false } });
-		}
+    [PunRPC]
+    void RPC_SetProtected()
+    {
+        isProtected = true;
+        Debug.Log($"[RPC] 🛡️ {playerName} ga himoya status berildi.");
+    }
 
-		FindObjectOfType<PlayerListUI>()?.RefreshPlayerList();
-	}
+    public void ReceiveKill()
+    {
+        
+        Debug.Log($"[{role}] ☠️ {playerName} ga hujum qilinmoqda...");
+        photonView.RPC(nameof(RPC_DoKill), RpcTarget.AllBuffered);
+    }
 
-	public void ResetNightAbilities()
-	{
-		hasAttacked = false;
-		hasHealed = false;
-		hasUsedAbilityThisNight = false;
-		isProtected = false;
-	}
+    [PunRPC]
+    void RPC_DoKill()
+    {
+        if (isProtected)
+        {
+            Debug.Log($"[RPC] 🛡️ {playerName} himoyalangani sababli o‘lmagan.");
+            isProtected = false;
+            return;
+        }
+
+        isAlive = false;
+        Debug.Log($"[RPC] ❌ {playerName} o‘ldi.");
+
+        if (photonView.IsMine)
+        {
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { "isAlive", false } });
+        }
+
+        FindObjectOfType<PlayerListUI>()?.RefreshPlayerList();
+    }
+
+    public void ResetNightAbilities()
+    {
+        hasAttacked = false;
+        hasHealed = false;
+        hasUsedAbilityThisNight = false;
+        isProtected = false;
+
+        Debug.Log($"[{role}] 🔄 {playerName} ning tunda ishlatilgan ability'lari reset qilindi.");
+    }
+    
+    [PunRPC]
+    public void MafiaMessage()
+    {
+        if (PhotonNetwork.IsMasterClient) // faqat xonadorga ko‘rsatiladi
+            MessageDisplayer.Instance.ShowMessageToAll("mafiya nishonga oldi");
+    }
+
+
+    [PunRPC]
+    public void DoctorMessage()
+    {
+        if (PhotonNetwork.IsMasterClient)
+            MessageDisplayer.Instance.ShowMessageToAll("doctor himoya qildi");
+    }
+
+    [PunRPC]
+    public void KomissarKillMessage()
+    {
+        if (PhotonNetwork.IsMasterClient)
+            MessageDisplayer.Instance.ShowMessageToAll("komissar pistoletni o`qladi");
+    }
+
+    [PunRPC]
+    public void KomissarInvestigateMessage()
+    {
+        if (PhotonNetwork.IsMasterClient)
+            MessageDisplayer.Instance.ShowMessageToAll("komissar tergovda");
+    }
+
+
+    
+   
 }
