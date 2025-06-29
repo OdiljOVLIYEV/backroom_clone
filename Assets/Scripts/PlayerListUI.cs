@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Obvious.Soap;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
@@ -16,7 +17,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     public TMP_Text timerText;
     public Image nightImage;
     public Image dayImage;
-    
+    public IntVariable MaxPlayer;
+    public int requiredPlayerCount ;
      // 🔹 Yangi prefab: har bir xabar uchun
 
     public bool enableNight = true;
@@ -36,7 +38,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     private List<string> nightEvents = new List<string>();
     private void Start()
     {
-        
+        requiredPlayerCount = MaxPlayer.Value;
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
         RefreshPlayerList();
         
@@ -49,12 +51,29 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
         if (photonView.IsMine)
         {
-            StartCoroutine(GameLoop());
+            StartCoroutine(WaitForAllPlayersThenStart());
         }
+    }
+
+    IEnumerator WaitForAllPlayersThenStart()
+    {
+        Debug.Log("⏳ Barcha o‘yinchilar kelishini kutyapmiz...");
+
+        // Barcha kerakli playerlar kelgunga qadar kutamiz
+        while (PhotonNetwork.CurrentRoom.PlayerCount < requiredPlayerCount)
+        {
+            timerText.text = $"Kutilyapti: {PhotonNetwork.CurrentRoom.PlayerCount}/{requiredPlayerCount}";
+            yield return new WaitForSeconds(1f);
+        }
+
+        Debug.Log("✅ Barcha o‘yinchilar keldi. O‘yin boshlanyapti.");
+        StartCoroutine(GameLoop());
     }
 
     IEnumerator GameLoop()
     {
+        
+        
         yield return new WaitForSeconds(2f);
         gameStarted = true;
         while (true)
