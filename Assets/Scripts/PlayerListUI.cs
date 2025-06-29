@@ -13,7 +13,6 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 {
     public GameObject playerItemPrefab;
     public Transform listParent;
-    public Text name;
     public TMP_Text timerText;
     public Image nightImage;
     public Image dayImage;
@@ -41,17 +40,17 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
         RefreshPlayerList();
         
-        if (name != null)
-        {
-            name.text = PhotonNetwork.LocalPlayer.NickName;
-        }
+
         if (!photonView.IsMine)
         {
             timerText.gameObject.SetActive(false);
             nightImage.gameObject.SetActive(false);
             dayImage.gameObject.SetActive(false);
         }
-        StartCoroutine(GameLoop());
+        if (photonView.IsMine)
+        {
+            StartCoroutine(GameLoop());
+        }
     }
 
     IEnumerator GameLoop()
@@ -201,17 +200,26 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         foreach (Transform child in listParent)
             Destroy(child.gameObject);
 
+        Player[] allPlayers = PhotonNetwork.PlayerList;
         PlayerRole[] allRoles = FindObjectsOfType<PlayerRole>();
         PlayerRole myRole = GetMyPlayerRole();
 
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (Player player in allPlayers)
         {
             GameObject item = Instantiate(playerItemPrefab, listParent);
             PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
             if (ui == null) continue;
 
-            ui.nameText.text = player.NickName;
-            PlayerRole pr = System.Array.Find(allRoles, r => r.photonView.Owner == player);
+            if (player.CustomProperties.TryGetValue("playerName", out object nameObj))
+            {
+                ui.nameText.text = nameObj.ToString();
+            }
+            else
+            {
+                ui.nameText.text = player.NickName;
+            }
+
+            PlayerRole pr = allRoles.FirstOrDefault(r => r.photonView.OwnerActorNr == player.ActorNumber);
 
             if (pr != null)
             {
@@ -225,7 +233,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 }
 
                 if (player == PhotonNetwork.LocalPlayer)
-                    ui.roleText.text = myRole.role.ToUpper();
+                    ui.roleText.text = myRole?.role.ToUpper();
                 else if (!pr.isAlive)
                 {
                     ui.roleText.text = pr.role.ToUpper();
@@ -234,10 +242,9 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 else
                     ui.roleText.text = "NOMALUM";
             }
-
-            if (!isNight && voteCounts.TryGetValue(player.ActorNumber.ToString(), out int votes))
+            else
             {
-                ui.statusText.text += $" | 🗳️ {votes} ovoz";
+                Debug.LogWarning($"⚠️ PlayerRole topilmadi: {player.NickName} | {player.ActorNumber}");
             }
 
             ui.MafiakillButton.gameObject.SetActive(false);

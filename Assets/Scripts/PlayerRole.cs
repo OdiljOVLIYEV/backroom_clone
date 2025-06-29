@@ -1,12 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
 using TMPro;
+using UnityEngine.UI;
 
 public class PlayerRole : MonoBehaviourPun
 {
     public string role;
     public string playerName;
+    public Text nameText;
     public bool isAlive = true;
     public bool isProtected = false;
 
@@ -19,10 +22,34 @@ public class PlayerRole : MonoBehaviourPun
         if (photonView.IsMine)
         {
             playerName = PhotonNetwork.NickName;
+
+            // Ismni hammaga yuboramiz
+            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable();
+            props["playerName"] = playerName;
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        }
+
+        UpdateNameUI();
+    }
+
+    private void Update()
+    {
+        // Agar ism hali olinmagan bo‘lsa, custom property orqali olamiz
+        if (string.IsNullOrEmpty(playerName) && photonView.Owner.CustomProperties.ContainsKey("playerName"))
+        {
+            playerName = photonView.Owner.CustomProperties["playerName"].ToString();
+            UpdateNameUI();
         }
     }
 
-  public void UseAbility(GameObject target, string type)
+    private void UpdateNameUI()
+    {
+        if (nameText != null && !string.IsNullOrEmpty(playerName))
+        {
+            nameText.text = playerName;
+        }
+    }
+    public void UseAbility(GameObject target, string type)
 {
     if (!isAlive) return;
 
