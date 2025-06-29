@@ -18,6 +18,7 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 	public Transform[] spawnPoints;
 	public IntVariable MaxPlayer;
 	private int maxplayer;
+	private int spawnIndex = 0;
 
 	private void Start()
 	{
@@ -52,42 +53,44 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 		}
 
 		// 1-mafia, 2-doctor, 3-komissar, qolgan citizen
-		photonView.RPC("SpawnPlayerWithRole", playerList[0], "Mafia");
-		photonView.RPC("SpawnPlayerWithRole", playerList[1], "Doctor");
-		photonView.RPC("SpawnPlayerWithRole", playerList[2], "Komissar");
+		int spawnIndex = 0;
+		photonView.RPC("SpawnPlayerWithRole", playerList[0], "Mafia", spawnIndex++);
+		photonView.RPC("SpawnPlayerWithRole", playerList[1], "Doctor", spawnIndex++);
+		photonView.RPC("SpawnPlayerWithRole", playerList[2], "Komissar", spawnIndex++);
 
 		for (int i = 3; i < playerList.Count; i++)
 		{
-			photonView.RPC("SpawnPlayerWithRole", playerList[i], "Citizen");
+			photonView.RPC("SpawnPlayerWithRole", playerList[i], "Citizen", spawnIndex++);
 		}
 	}
 
+
 	[PunRPC]
-	private void SpawnPlayerWithRole(string role)
+	private void SpawnPlayerWithRole(string role, int spawnIndex)
 	{
-		Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+		Transform spawnPoint = spawnPoints[spawnIndex];
 
 		switch (role)
 		{
-		case "Mafia":
-			PhotonNetwork.Instantiate(mafiaPrefab.name, spawnPoint.position, Quaternion.identity);
-			Debug.Log("Siz MAFIA bo‘ldingiz");
-			break;
-		case "Doctor":
-			PhotonNetwork.Instantiate(doctorPrefab.name, spawnPoint.position, Quaternion.identity);
-			Debug.Log("Siz DOCTOR bo‘ldingiz");
-			break;
-		case "Komissar":
-			PhotonNetwork.Instantiate(komissarPrefab.name, spawnPoint.position, Quaternion.identity);
-			Debug.Log("Siz KOMISSAR bo‘ldingiz");
-			break;
-		case "Citizen":
-			PhotonNetwork.Instantiate(citizenPrefab.name, spawnPoint.position, Quaternion.identity);
-			Debug.Log("Siz FUQARO bo‘ldingiz");
-			break;
+			case "Mafia":
+				PhotonNetwork.Instantiate(mafiaPrefab.name, spawnPoint.position, Quaternion.identity);
+				Debug.Log("Siz MAFIA bo‘ldingiz");
+				break;
+			case "Doctor":
+				PhotonNetwork.Instantiate(doctorPrefab.name, spawnPoint.position, Quaternion.identity);
+				Debug.Log("Siz DOCTOR bo‘ldingiz");
+				break;
+			case "Komissar":
+				PhotonNetwork.Instantiate(komissarPrefab.name, spawnPoint.position, Quaternion.identity);
+				Debug.Log("Siz KOMISSAR bo‘ldingiz");
+				break;
+			case "Citizen":
+				PhotonNetwork.Instantiate(citizenPrefab.name, spawnPoint.position, Quaternion.identity);
+				Debug.Log("Siz FUQARO bo‘ldingiz");
+				break;
 		}
-		
 	}
+
 
 	public override void OnLeftRoom()
 	{
