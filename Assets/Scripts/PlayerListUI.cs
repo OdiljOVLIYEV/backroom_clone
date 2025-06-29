@@ -99,15 +99,18 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 voteLogs.Clear();
                 ResetNightAbilities();
 
-                // 🔹 UI-ni yangilash
+                if (photonView.IsMine && MessageDisplayer.Instance != null)
+                {
+                    MessageDisplayer.Instance.ClearMessagesForAll();
+                }
+
                 if (photonView.IsMine)
                 {
                     nightImage.gameObject.SetActive(false);
                     dayImage.gameObject.SetActive(true);
                 }
 
-                ShowNightResults();
-                RefreshPlayerList();
+                yield return StartCoroutine(ShowNightResultsCoroutine());
 
                 float timeLeft = dayDuration;
                 while (timeLeft > 0f)
@@ -128,6 +131,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             }
 
 
+
             yield return null;
         }
     }
@@ -136,33 +140,36 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
 
 
-    void ShowNightResults()
+    IEnumerator ShowNightResultsCoroutine()
     {
-        Debug.Log($"[ShowNightResults] 🔔 TUN NATIJALARI: {pendingKills.Count} kill, {pendingSaves.Count} save");
-        Debug.Log($"[ShowNightResults] ✅ Mastermi: {PhotonNetwork.IsMasterClient}");
-
         foreach (Player target in pendingKills)
         {
             if (pendingSaves.Contains(target))
             {
-                Debug.Log($"[ShowNightResults] 🛡️ {target.NickName} doctor tomonidan saqlandi");
-               
+                MessageDisplayer.Instance?.ShowMessageToAll($"🛡️ {target.NickName} doctor tomonidan saqlandi!");
             }
             else
             {
-                Debug.Log($"[ShowNightResults] ☠️ {target.NickName} o‘ldirildi");
-              
+                MessageDisplayer.Instance?.ShowMessageToAll($"☠️ {target.NickName} o‘ldirildi!");
                 photonView.RPC(nameof(EliminatePlayer), RpcTarget.All, target.ActorNumber);
             }
         }
 
-        // 🔻 Ana endi bu yerga qo‘shing:
-        foreach (var message in nightEvents)
+        foreach (var msg in nightEvents)
         {
-            Debug.Log($"[ShowNightResults] 📜 Extra night event: {message}");
-            
+            MessageDisplayer.Instance?.ShowMessageToAll(msg);
         }
+
+        yield return new WaitForSeconds(1f); // ⚠️ Sabrsiz RPC'lar tugashini kutish
+
+        RefreshPlayerList();
+
+        pendingKills.Clear();
+        pendingSaves.Clear();
+        nightEvents.Clear();
     }
+
+
 
 
 
@@ -170,25 +177,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
 
 
-    public void AddPendingKill(Player player)
-    {
-        if (!pendingKills.Contains(player))
-        {
-            pendingKills.Add(player);
-            Debug.Log($"[AddPendingKill] ☠️ Pending kill qo‘shildi: {player.NickName}");
-        }
-        else
-        {
-            Debug.Log($"[AddPendingKill] ⏩ {player.NickName} allaqachon pending listda.");
-        }
-    }
-
-
-    public void AddPendingSave(Player player)
-    {
-        if (!pendingSaves.Contains(player))
-            pendingSaves.Add(player);
-    }
+    
 
     public void AddNightEvent(string msg)
     {

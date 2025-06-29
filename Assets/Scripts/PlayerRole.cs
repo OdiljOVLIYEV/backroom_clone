@@ -37,8 +37,10 @@ public class PlayerRole : MonoBehaviourPun
             if (type == "kill" && !hasAttacked)
             {
                 photonView.RPC("MafiaMessage", RpcTarget.All);
-                targetRole.ReceiveKill();
-               
+                // ❗ KILL ENDI PENDINGDA QO‘SHILADI
+                PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
+                playerListView.RPC("RPC_AddPendingKill", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
+
                 hasAttacked = true;
             }
             break;
@@ -47,8 +49,9 @@ public class PlayerRole : MonoBehaviourPun
             if (type == "protect" && !hasHealed)
             {
                 photonView.RPC("DoctorMessage", RpcTarget.All);
-                targetRole.ReceiveProtect();
-               
+                PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
+                playerListView.RPC("RPC_AddPendingSave", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
+
                 hasHealed = true;
             }
             break;
@@ -59,8 +62,9 @@ public class PlayerRole : MonoBehaviourPun
                 if (type == "kill")
                 {
                     photonView.RPC("KomissarKillMessage", RpcTarget.All);
-                    targetRole.ReceiveKill();
-                   
+                    // Kill qilmang – pending qiling
+                    PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
+                    playerListView.RPC("RPC_AddPendingKill", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
                 }
                 else if (type == "investigate")
                 {
@@ -74,6 +78,7 @@ public class PlayerRole : MonoBehaviourPun
             break;
     }
 }
+
 
    
   
