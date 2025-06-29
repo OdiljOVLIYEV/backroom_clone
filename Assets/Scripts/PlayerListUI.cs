@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
+using UnityEngine.SceneManagement;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayerListUI : MonoBehaviourPunCallbacks
@@ -23,6 +24,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
     public float nightDuration = 30f;
     public float dayDuration = 20f;
+    private bool gameStarted = false;
 
     private static bool isNight = false;
     private bool hasVoted = false;
@@ -53,7 +55,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     IEnumerator GameLoop()
     {
         yield return new WaitForSeconds(2f);
-
+        gameStarted = true;
         while (true)
         {
             // 🌙 TUN
@@ -270,7 +272,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             }
 
             // Doctor o‘zini faqat tunda himoya qiladi
-            if (isNight && myRole != null && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
+            if (isNight && myRole != null && myRole.isAlive && myRole.role == "Doctor" && player == PhotonNetwork.LocalPlayer)
             {
                 ui.protectButton.gameObject.SetActive(true);
                 ui.protectButton.onClick.RemoveAllListeners();
@@ -278,7 +280,10 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             }
 
             // KUN REJIMI OVOZ BERISH
-            if (!isNight && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+            // ✅ Ovoz berish tugmasini faqat o‘yin boshlangan bo‘lsa va kun bo‘lsa ko‘rsatamiz
+            if (gameStarted && !isNight && enableDay && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+
+
             {
                 ui.voteButton.gameObject.SetActive(true);
                 ui.voteButton.onClick.RemoveAllListeners();
@@ -296,6 +301,57 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             }
         }
     }
+    private void CheckForGameEnd()
+    {
+        var allRoles = FindObjectsOfType<PlayerRole>();
+        int mafiaAlive = allRoles.Count(r => r.role.ToLower() == "mafia" && r.isAlive);
+        int othersAlive = allRoles.Count(r => r.role.ToLower() != "mafia" && r.isAlive);
+
+        if (mafiaAlive == 0)
+        {
+            GameObject item = Instantiate(playerItemPrefab, listParent);
+            PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
+            if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
+            ui.killButton.gameObject.SetActive(false);
+            ui.investigateButton.gameObject.SetActive(false);
+            ui.protectButton.gameObject.SetActive(false);
+            ui.voteButton.gameObject.SetActive(false);
+
+            timerText.gameObject.SetActive(false);
+            nightImage.gameObject.SetActive(false);
+            dayImage.gameObject.SetActive(false);
+            Debug.Log("Shahar g‘alaba qildi!");
+           // MessageDisplayer.Instance?.ShowMessageToAll("🏙️ Shahar g‘alaba qildi! Barcha mafiya o‘ldi.");
+            StopAllCoroutines();
+            StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
+        }
+        else if (mafiaAlive >= othersAlive)
+        {   
+            GameObject item = Instantiate(playerItemPrefab, listParent);
+            PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
+            if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
+            ui.killButton.gameObject.SetActive(false);
+            ui.investigateButton.gameObject.SetActive(false);
+            ui.protectButton.gameObject.SetActive(false);
+            ui.voteButton.gameObject.SetActive(false);
+            timerText.gameObject.SetActive(false);
+            nightImage.gameObject.SetActive(false);
+            dayImage.gameObject.SetActive(false);
+            Debug.Log("Mafiya g‘alaba qildi");
+           // MessageDisplayer.Instance?.ShowMessageToAll("😈 Mafiya g‘alaba qildi! Ular ko‘pchilikni tashkil etyapti.");
+            StopAllCoroutines();
+            StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
+        }
+    }
+    
+    
+
+    IEnumerator LoadSceneAfterDelay(string sceneName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene(sceneName);
+    }
+
     public Player GetPhotonPlayerByName(string name)
     {
         foreach (var p in PhotonNetwork.PlayerList)
@@ -307,7 +363,6 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     {
         if (hasVoted || votedPlayer == null) return;
 
-        // ❗ Faqat tiriklar ovoz berishi va tiriklarga ovoz berilishi kerak
         var myRole = GetMyPlayerRole();
         var targetRole = FindObjectsOfType<PlayerRole>().FirstOrDefault(r => r.photonView.Owner == votedPlayer);
 
@@ -321,8 +376,15 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
         Debug.Log($"🗳️ {voterName} ovoz berdi ➡️ {votedName}");
 
+        // ✅ Barcha o‘yinchilarga xabar ko‘rsatish
+        if (MessageDisplayer.Instance != null)
+        {
+            MessageDisplayer.Instance.ShowMessageToAll($"🗳️ {voterName} ➡️ {votedName} ga ovoz berdi.");
+        }
+
         photonView.RPC(nameof(RegisterVote), RpcTarget.MasterClient, votedKey, voterName, votedName);
     }
+
 
 
 
@@ -386,7 +448,11 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
 
         RefreshPlayerList();
+
+        if (PhotonNetwork.IsMasterClient)
+            CheckForGameEnd(); // ✅ BU YERGA QO‘SHILADI
     }
+
 
 
     private PlayerRole GetMyPlayerRole()
