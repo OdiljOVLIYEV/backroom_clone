@@ -41,7 +41,12 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         {
             name.text = PhotonNetwork.LocalPlayer.NickName;
         }
-        
+        if (!photonView.IsMine)
+        {
+            timerText.gameObject.SetActive(false);
+            nightImage.gameObject.SetActive(false);
+            dayImage.gameObject.SetActive(false);
+        }
         StartCoroutine(GameLoop());
     }
 
@@ -52,6 +57,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         while (true)
         {
             // 🌙 TUN
+            // 🌙 TUN
             if (enableNight)
             {
                 isNight = true;
@@ -59,6 +65,13 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 nightEvents.Clear();
                 pendingKills.Clear();
                 pendingSaves.Clear();
+
+                // 🔹 UI-ni yangilash
+                if (photonView.IsMine)
+                {
+                    nightImage.gameObject.SetActive(true);
+                    dayImage.gameObject.SetActive(false);
+                }
 
                 RefreshPlayerList();
 
@@ -71,6 +84,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 }
             }
 
+
             // ☀️ KUN
             if (enableDay)
             {
@@ -79,6 +93,13 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 voteCounts.Clear();
                 voteLogs.Clear();
                 ResetNightAbilities();
+
+                // 🔹 UI-ni yangilash
+                if (photonView.IsMine)
+                {
+                    nightImage.gameObject.SetActive(false);
+                    dayImage.gameObject.SetActive(true);
+                }
 
                 ShowNightResults();
                 RefreshPlayerList();
@@ -100,6 +121,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                     }
                 }
             }
+
 
             yield return null;
         }
