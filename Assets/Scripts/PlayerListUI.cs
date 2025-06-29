@@ -66,13 +66,18 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 pendingKills.Clear();
                 pendingSaves.Clear();
 
+                if (photonView.IsMine && MessageDisplayer.Instance != null)
+                {
+                    MessageDisplayer.Instance.ClearMessagesForAll();
+                }
+
                 // 🔹 UI-ni yangilash
                 if (photonView.IsMine)
                 {
                     nightImage.gameObject.SetActive(true);
                     dayImage.gameObject.SetActive(false);
                 }
-
+                
                 RefreshPlayerList();
 
                 float timeLeft = nightDuration;

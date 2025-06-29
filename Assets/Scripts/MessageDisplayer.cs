@@ -46,4 +46,20 @@ public class MessageDisplayer : MonoBehaviourPun
             Debug.LogWarning("[MessageDisplayer] ⚠️ TMP_Text topilmadi!");
         }
     }
+    
+    public void ClearMessagesForAll()
+    {
+        photonView.RPC(nameof(RPC_ClearMessages), RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void RPC_ClearMessages()
+    {
+        foreach (Transform child in messageListParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
 }
