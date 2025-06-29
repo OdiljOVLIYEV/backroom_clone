@@ -17,6 +17,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     public TMP_Text timerText;
     public Image nightImage;
     public Image dayImage;
+    
      // 🔹 Yangi prefab: har bir xabar uchun
 
     public bool enableNight = true;
@@ -36,9 +37,10 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     private List<string> nightEvents = new List<string>();
     private void Start()
     {
+        
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
         RefreshPlayerList();
-
+        
         if (name != null)
         {
             name.text = PhotonNetwork.LocalPlayer.NickName;
@@ -309,6 +311,10 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
         if (mafiaAlive == 0)
         {
+            StopAllCoroutines();
+            timerText.gameObject.SetActive(false);
+            nightImage.gameObject.SetActive(false);
+            dayImage.gameObject.SetActive(false);
             GameObject item = Instantiate(playerItemPrefab, listParent);
             PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
             if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
@@ -316,17 +322,22 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             ui.investigateButton.gameObject.SetActive(false);
             ui.protectButton.gameObject.SetActive(false);
             ui.voteButton.gameObject.SetActive(false);
-
-            timerText.gameObject.SetActive(false);
-            nightImage.gameObject.SetActive(false);
-            dayImage.gameObject.SetActive(false);
+            
+           
             Debug.Log("Shahar g‘alaba qildi!");
-           // MessageDisplayer.Instance?.ShowMessageToAll("🏙️ Shahar g‘alaba qildi! Barcha mafiya o‘ldi.");
-            StopAllCoroutines();
+            if (MessageDisplayer.Instance != null)
+            {
+                MessageDisplayer.Instance.ShowWinnerMessageToAll("Shahar g‘alaba qildi!", Color.green);
+            }
+           
             StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
         }
         else if (mafiaAlive >= othersAlive)
         {   
+            StopAllCoroutines();
+            timerText.gameObject.SetActive(false);
+            nightImage.gameObject.SetActive(false);
+            dayImage.gameObject.SetActive(false);
             GameObject item = Instantiate(playerItemPrefab, listParent);
             PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
             if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
@@ -334,12 +345,12 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             ui.investigateButton.gameObject.SetActive(false);
             ui.protectButton.gameObject.SetActive(false);
             ui.voteButton.gameObject.SetActive(false);
-            timerText.gameObject.SetActive(false);
-            nightImage.gameObject.SetActive(false);
-            dayImage.gameObject.SetActive(false);
-            Debug.Log("Mafiya g‘alaba qildi");
-           // MessageDisplayer.Instance?.ShowMessageToAll("😈 Mafiya g‘alaba qildi! Ular ko‘pchilikni tashkil etyapti.");
-            StopAllCoroutines();
+            
+            if (MessageDisplayer.Instance != null)
+            {
+                MessageDisplayer.Instance.ShowWinnerMessageToAll("Mafiya g‘alaba qildi!", Color.red);
+            }
+           
             StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
         }
     }
