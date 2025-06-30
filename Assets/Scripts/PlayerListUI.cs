@@ -49,17 +49,18 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             nightImage.gameObject.SetActive(false);
             dayImage.gameObject.SetActive(false);
         }
-        if (photonView.IsMine)
+        
+        if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(WaitForAllPlayersThenStart());
+            StartCoroutine(WaitForAllPlayersThenStart()); // faqat master kutadi
         }
+        
     }
 
     IEnumerator WaitForAllPlayersThenStart()
     {
         Debug.Log("⏳ Barcha o‘yinchilar kelishini kutyapmiz...");
 
-        // Barcha kerakli playerlar kelgunga qadar kutamiz
         while (PhotonNetwork.CurrentRoom.PlayerCount < requiredPlayerCount)
         {
             timerText.text = $"Kutilyapti: {PhotonNetwork.CurrentRoom.PlayerCount}/{requiredPlayerCount}";
@@ -67,8 +68,15 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
 
         Debug.Log("✅ Barcha o‘yinchilar keldi. O‘yin boshlanyapti.");
+
+        photonView.RPC(nameof(RPC_StartGame), RpcTarget.All);
+    }
+    [PunRPC]
+    void RPC_StartGame()
+    {
         StartCoroutine(GameLoop());
     }
+
 
     IEnumerator GameLoop()
     {
@@ -164,17 +172,26 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
     IEnumerator ShowNightResultsCoroutine()
     {
+        PlayerRole[] allRoles = FindObjectsOfType<PlayerRole>();
+
         foreach (Player target in pendingKills)
         {
-            if (pendingSaves.Contains(target))
+            PlayerRole role = allRoles.FirstOrDefault(r => r.photonView.OwnerActorNr == target.ActorNumber);
+            if (role == null) continue;
+
+            bool isSaved = pendingSaves.Any(p => p.ActorNumber == target.ActorNumber);
+
+            if (isSaved)
             {
+                role.ReceiveProtect(); // isProtected = true qo‘yamiz
                 MessageDisplayer.Instance?.ShowMessageToAll($"🛡️ {target.NickName} doctor tomonidan saqlandi!");
             }
             else
             {
+                role.ReceiveKill(); // agar doctor himoya qilmagan bo‘lsa, kill ishlaydi
                 MessageDisplayer.Instance?.ShowMessageToAll($"☠️ {target.NickName} o‘ldirildi!");
-                photonView.RPC(nameof(EliminatePlayer), RpcTarget.All, target.ActorNumber);
             }
+
         }
 
         foreach (var msg in nightEvents)
@@ -182,7 +199,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             MessageDisplayer.Instance?.ShowMessageToAll(msg);
         }
 
-        yield return new WaitForSeconds(1f); // ⚠️ Sabrsiz RPC'lar tugashini kutish
+        yield return new WaitForSeconds(1f);
 
         RefreshPlayerList();
 
@@ -190,6 +207,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         pendingSaves.Clear();
         nightEvents.Clear();
     }
+
+
 
 
 
@@ -543,9 +562,14 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         if (p != null && !pendingSaves.Contains(p))
         {
             pendingSaves.Add(p);
-            Debug.Log($"[RPC_AddPendingSave] 🛡️ {p.NickName} pending save listga qo‘shildi.");
+            Debug.Log($"✅ [Doctor Save] 🛡️ {p.NickName} saqlanmoqda");
+        }
+        else
+        {
+            Debug.LogWarning($"❌ [Doctor Save] topilmadi yoki allaqachon saqlangan: {actorNumber}");
         }
     }
+
 
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)

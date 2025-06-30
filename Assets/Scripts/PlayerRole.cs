@@ -116,9 +116,11 @@ public class PlayerRole : MonoBehaviourPun
    
     public void ReceiveProtect()
     {
-        Debug.Log($"[{role}] 🛡️ {playerName} himoyalandi.");
-        photonView.RPC(nameof(RPC_SetProtected), RpcTarget.AllBuffered);
+        isProtected = true;
+        Debug.Log($"🛡️ {playerName} doctor tomonidan himoyalandi.");
     }
+
+
 
     [PunRPC]
     void RPC_SetProtected()
@@ -160,10 +162,9 @@ public class PlayerRole : MonoBehaviourPun
         hasAttacked = false;
         hasHealed = false;
         hasUsedAbilityThisNight = false;
-        isProtected = false;
-
-        Debug.Log($"[{role}] 🔄 {playerName} ning tunda ishlatilgan ability'lari reset qilindi.");
+        // ❌ isProtected ni bu yerda reset QILMAYMIZ!
     }
+
     
     [PunRPC]
     public void MafiaMessage()
