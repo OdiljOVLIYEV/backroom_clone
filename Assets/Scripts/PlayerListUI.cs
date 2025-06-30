@@ -206,6 +206,11 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         pendingKills.Clear();
         pendingSaves.Clear();
         nightEvents.Clear();
+        
+        if (PhotonNetwork.IsMasterClient)
+        {
+            CheckForGameEnd(); // 🔴 Shu yerga qo‘shish kerak
+        }
     }
 
 
