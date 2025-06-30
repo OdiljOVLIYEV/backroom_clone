@@ -86,11 +86,11 @@ public class PlayerRole : MonoBehaviourPun
         case "Komissar":
             if (!hasUsedAbilityThisNight)
             {
+                PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
+
                 if (type == "kill")
                 {
                     photonView.RPC("KomissarKillMessage", RpcTarget.All);
-                    // Kill qilmang – pending qiling
-                    PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
                     playerListView.RPC("RPC_AddPendingKill", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
                 }
                 else if (type == "investigate")
@@ -103,6 +103,7 @@ public class PlayerRole : MonoBehaviourPun
                 hasUsedAbilityThisNight = true;
             }
             break;
+
     }
 }
 
@@ -118,7 +119,11 @@ public class PlayerRole : MonoBehaviourPun
     {
         isProtected = true;
         Debug.Log($"🛡️ {playerName} doctor tomonidan himoyalandi.");
+
+        // 👇 BARCHA KLIENTGA isProtected TRUE DEB YUBORAMIZ
+        photonView.RPC(nameof(RPC_SetProtected), RpcTarget.AllBuffered);
     }
+
 
 
 

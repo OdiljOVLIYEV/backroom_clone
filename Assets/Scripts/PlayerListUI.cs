@@ -173,9 +173,10 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     IEnumerator ShowNightResultsCoroutine()
     {
         PlayerRole[] allRoles = FindObjectsOfType<PlayerRole>();
-
+        Debug.Log("📜 [TUN NATIJALARI] PendingKill lar:");
         foreach (Player target in pendingKills)
         {
+            
             PlayerRole role = allRoles.FirstOrDefault(r => r.photonView.OwnerActorNr == target.ActorNumber);
             if (role == null) continue;
 
