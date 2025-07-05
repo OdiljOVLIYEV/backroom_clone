@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
@@ -16,7 +17,8 @@ public class PlayerRole : MonoBehaviourPun
     private bool hasAttacked = false;
     private bool hasHealed = false;
     private bool hasUsedAbilityThisNight = false;
-   
+    public List<int> investigatedActorNumbers = new List<int>();
+
     private void Start()
     {
         if (photonView.IsMine)
@@ -83,26 +85,35 @@ public class PlayerRole : MonoBehaviourPun
             }
             break;
 
-        case "Komissar":
-            if (!hasUsedAbilityThisNight)
+      case "Komissar":
+    if (!hasUsedAbilityThisNight)
+    {
+        PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
+
+        if (type == "kill")
+        {
+            photonView.RPC("KomissarKillMessage", RpcTarget.All);
+            playerListView.RPC("RPC_AddPendingKill", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
+        }
+        else if (type == "investigate")
+        {
+            photonView.RPC("KomissarInvestigateMessage", RpcTarget.All);
+
+            if (photonView.IsMine)
             {
-                PhotonView playerListView = playerListUI.GetComponent<PhotonView>();
-
-                if (type == "kill")
+                if (!investigatedActorNumbers.Contains(targetRole.photonView.OwnerActorNr))
                 {
-                    photonView.RPC("KomissarKillMessage", RpcTarget.All);
-                    playerListView.RPC("RPC_AddPendingKill", RpcTarget.MasterClient, targetRole.photonView.OwnerActorNr);
-                }
-                else if (type == "investigate")
-                {
-                    photonView.RPC("KomissarInvestigateMessage", RpcTarget.All);
-                    if (photonView.IsMine)
-                        playerListUI.ShowInvestigationResult(targetRole.photonView.Owner, targetRole.role);
+                    investigatedActorNumbers.Add(targetRole.photonView.OwnerActorNr);
                 }
 
-                hasUsedAbilityThisNight = true;
+                
             }
-            break;
+        }
+
+        hasUsedAbilityThisNight = true;
+    }
+    break;
+
 
     }
 }

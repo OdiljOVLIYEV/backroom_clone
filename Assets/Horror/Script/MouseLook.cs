@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Obvious.Soap;
 using UnityEngine;
 using Photon.Pun;
 
 public class MouseLook : MonoBehaviour
 {
     public float mouseSensitivity = 100f;
-
+    [SerializeField] private BoolVariable CAMERALOCK;
+    
+    
     public float minY = -90f; // Vertikal pastga qarash limiti
     public float maxY = 90f;  // Vertikal tepaga qarash limiti
 
@@ -23,18 +26,22 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        if (CAMERALOCK.Value == false) 
+        {
+            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Vertikal kamerani cheklash
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, minY, maxY);
+            // Vertikal kamerani cheklash
+            xRotation -= mouseY;
+            xRotation = Mathf.Clamp(xRotation, minY, maxY);
 
-        // Gorizontal kamerani cheklash
-        yRotation += mouseX;
-        yRotation = Mathf.Clamp(yRotation, minX, maxX);
+            // Gorizontal kamerani cheklash
+            yRotation += mouseX;
+            yRotation = Mathf.Clamp(yRotation, minX, maxX);
 
-        // Faqat kamera harakat qiladi
-        transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+            // Faqat kamera harakat qiladi
+            transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        }
+        
     }
 }

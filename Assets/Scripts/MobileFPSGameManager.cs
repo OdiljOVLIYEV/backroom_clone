@@ -13,8 +13,8 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 	public GameObject doctorPrefab;
 	public GameObject komissarPrefab;
 	public GameObject citizenPrefab;
-	
-   
+	public GameObject CAMERA;
+	public GameObject UIPANEL;
 	public Transform[] spawnPoints;
 	public IntVariable MaxPlayer;
 	private int maxplayer;
@@ -22,14 +22,54 @@ public class MobileFPSGameManager : MonoBehaviourPunCallbacks
 
 	private void Start()
 	{
+		
+
 		maxplayer = MaxPlayer.Value;
 		
 		if (PhotonNetwork.IsMasterClient)
 		{
+			StartCoroutine(DelayedCameraHide(2f)); // 3 soniyadan keyin
+		}
+		if (PhotonNetwork.IsMasterClient)
+		{
 			StartCoroutine(AssignRolesAfterDelay());
+			
 		}
 	}
+	private IEnumerator DelayedCameraHide(float delay)
+	{
+		
+		yield return new WaitForSeconds(delay);
 
+		photonView.RPC("HideCamera", RpcTarget.All);
+		
+		yield return new WaitForSeconds(0.1F);
+		
+		photonView.RPC("HideUI", RpcTarget.All);
+	}
+	
+	[PunRPC]
+	private void HideUI()
+	{
+		if (UIPANEL != null)
+		{
+			UIPANEL.SetActive(true);
+			Debug.Log("CAMERA o‘chirildi: " + PhotonNetwork.NickName);
+		}
+	}
+	
+	[PunRPC]
+	private void HideCamera()
+	{
+		if (CAMERA != null)
+		{
+			CAMERA.SetActive(false);
+			Debug.Log("CAMERA o‘chirildi: " + PhotonNetwork.NickName);
+		}
+		
+	}
+
+	
 	IEnumerator AssignRolesAfterDelay()
 	{
 		yield return new WaitForSeconds(1f);

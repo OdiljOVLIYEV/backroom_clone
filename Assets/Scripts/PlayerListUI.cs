@@ -23,7 +23,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
     public bool enableNight = true;
     public bool enableDay = true;
-
+    [SerializeField] private BoolVariable CAMERALOCK;
+    
     public float nightDuration = 30f;
     public float dayDuration = 20f;
     private bool gameStarted = false;
@@ -90,6 +91,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             // 🌙 TUN
             if (enableNight)
             {
+                CAMERALOCK.Value = false;
                 isNight = true;
                 hasVoted = false;
                 nightEvents.Clear();
@@ -123,6 +125,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             // ☀️ KUN
             if (enableDay)
             {
+                CAMERALOCK.Value = true;
                 isNight = false;
                 hasVoted = false;
                 voteCounts.Clear();
@@ -176,7 +179,6 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         Debug.Log("📜 [TUN NATIJALARI] PendingKill lar:");
         foreach (Player target in pendingKills)
         {
-            
             PlayerRole role = allRoles.FirstOrDefault(r => r.photonView.OwnerActorNr == target.ActorNumber);
             if (role == null) continue;
 
@@ -184,35 +186,55 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
             if (isSaved)
             {
-                role.ReceiveProtect(); // isProtected = true qo‘yamiz
+                role.ReceiveProtect();
                 MessageDisplayer.Instance?.ShowMessageToAll($"🛡️ {target.NickName} doctor tomonidan saqlandi!");
             }
             else
             {
-                role.ReceiveKill(); // agar doctor himoya qilmagan bo‘lsa, kill ishlaydi
+                role.ReceiveKill();
                 MessageDisplayer.Instance?.ShowMessageToAll($"☠️ {target.NickName} o‘ldirildi!");
             }
-
         }
 
+        // 📜 Qo‘shimcha tun xabarlari
         foreach (var msg in nightEvents)
         {
             MessageDisplayer.Instance?.ShowMessageToAll(msg);
         }
 
+        // ⏳ Bir soniya kutish
         yield return new WaitForSeconds(1f);
+
+        // 👮 KOMISSAR UCHUN TERGOV NATIJALARI
+        PlayerRole myRole = GetMyPlayerRole();
+        if (myRole != null && myRole.role == "Komissar" && myRole.investigatedActorNumbers.Count > 0)
+        {
+            foreach (var actorNum in myRole.investigatedActorNumbers)
+            {
+                Player player = PhotonNetwork.CurrentRoom.GetPlayer(actorNum);
+                if (player == null) continue;
+
+                PlayerRole targetRole = allRoles.FirstOrDefault(r => r.photonView.OwnerActorNr == actorNum);
+                if (targetRole == null) continue;
+
+                // Natijani faqat Komissar ko‘radi
+                ShowInvestigationResult(player, targetRole.role);
+            }
+        }
 
         RefreshPlayerList();
 
+        // 🔄 Tozalash
         pendingKills.Clear();
         pendingSaves.Clear();
         nightEvents.Clear();
-        
+
         if (PhotonNetwork.IsMasterClient)
         {
-            CheckForGameEnd(); // 🔴 Shu yerga qo‘shish kerak
+            CheckForGameEnd();
         }
     }
+
 
 
 
@@ -283,8 +305,16 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                     ui.roleText.text = pr.role.ToUpper();
                     ui.roleText.color = Color.red;
                 }
+                else if (myRole != null && myRole.role == "Komissar" && myRole.investigatedActorNumbers.Contains(player.ActorNumber))
+                {
+                    ui.roleText.text = pr.role.ToUpper();
+                    ui.roleText.color = Color.yellow;
+                }
                 else
+                {
                     ui.roleText.text = "NOMALUM";
+                }
+
             }
             else
             {
