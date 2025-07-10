@@ -1,6 +1,8 @@
+using Obvious.Soap;
 using UnityEngine;
 using TMPro;
-using Photon.Pun; // <--- ADD THIS
+using Photon.Pun;
+using UnityEngine.EventSystems;
 
 public class MessageDisplayer : MonoBehaviourPun
 {
@@ -9,15 +11,57 @@ public class MessageDisplayer : MonoBehaviourPun
     [Header("UI komponentlar")]
     public Transform messageListParent;
     public GameObject messageItemPrefab;
-    public TMP_Text gameOverText; 
+    public TMP_Text gameOverText;
+
+    [Header("Xabar yozish paneli")]
+    public TMP_InputField messageInputField;
+
+ 
+    [SerializeField] private BoolVariable UIPanel;
+    [SerializeField] private GameObject UI;
     private void Awake()
     {
+        if (messageInputField != null)
+        {
+            messageInputField.characterLimit = 30;
+        }
+        
         if (Instance != null && Instance != this)
         {
             Destroy(this);
             return;
         }
         Instance = this;
+    }
+
+    private void Update()
+    {
+        Debug.Log("Kun: " + UIPanel.Value);
+
+        if (UIPanel.Value==true)
+        {
+            Debug.Log("UI ON");
+            UI.SetActive(true);
+        }
+        else
+        {
+            
+            Debug.Log("UI OFF");
+            UI.SetActive(false);
+        }
+        
+        if (messageInputField != null && Input.GetKeyDown(KeyCode.Return) && messageInputField.isFocused)
+        {
+            string message = messageInputField.text.Trim();
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                string playerName = PhotonNetwork.NickName; // Foydalanuvchi nomi
+                ShowMessageToAll($"{playerName}: {message}");
+                messageInputField.text = "";
+                EventSystem.current.SetSelectedGameObject(null); // Fokusdan chiqarish
+            }
+        }
     }
 
     public void ShowMessageToAll(string message)
@@ -31,7 +75,7 @@ public class MessageDisplayer : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPC_ShowWinnerMessage(string message, Vector3 colorVec)
+    public void RPC_ShowWinnerMessage(string message, Vector3 colorVec)
     {
         if (gameOverText != null)
         {
@@ -39,12 +83,7 @@ public class MessageDisplayer : MonoBehaviourPun
             gameOverText.color = new Color(colorVec.x, colorVec.y, colorVec.z);
             gameOverText.gameObject.SetActive(true);
         }
-        else
-        {
-            Debug.LogWarning("[MessageDisplayer] ❌ gameOverText yo‘q");
-        }
     }
-
 
     [PunRPC]
     public void RPC_ShowMessage(string message)
@@ -59,7 +98,7 @@ public class MessageDisplayer : MonoBehaviourPun
         {
             Destroy(messageListParent.GetChild(0).gameObject);
         }
-        
+
         GameObject msgItem = Instantiate(messageItemPrefab, messageListParent);
         TMP_Text txt = msgItem.GetComponentInChildren<TMP_Text>();
 
@@ -72,7 +111,7 @@ public class MessageDisplayer : MonoBehaviourPun
             Debug.LogWarning("[MessageDisplayer] ⚠️ TMP_Text topilmadi!");
         }
     }
-    
+
     public void ClearMessagesForAll()
     {
         photonView.RPC(nameof(RPC_ClearMessages), RpcTarget.All);
@@ -86,6 +125,4 @@ public class MessageDisplayer : MonoBehaviourPun
             Destroy(child.gameObject);
         }
     }
-
-
 }

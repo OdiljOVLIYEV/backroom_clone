@@ -47,7 +47,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public GameObject JoinRandomRoom_UI_Panel;
     public IntVariable MaxPlayer;
 	private int maxPlayer;
-
+    public Slider slider;
+    public Text valueText;
 
     private Dictionary<string, RoomInfo> cachedRoomList;
     private Dictionary<string, GameObject> roomListGameobjects;
@@ -62,6 +63,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         maxPlayer = MaxPlayer.Value;
         ActivatePanel(Login_UI_Panel.name);
 
+        slider.onValueChanged.AddListener(OnSliderChanged);
+        OnSliderChanged(slider.value); // boshlang‘ich qiymatni berish
+        
         cachedRoomList = new Dictionary<string, RoomInfo>();
         roomListGameobjects = new Dictionary<string, GameObject>();
 
@@ -82,7 +86,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     }
 
     #endregion
+    private void OnSliderChanged(float value)
+    {
+        MaxPlayer.Value= Mathf.RoundToInt(value);
+        
 
+        if (valueText != null)
+            valueText.text = "MaxPlayer: " + MaxPlayer.Value.ToString();
+    }
 
     #region UI Callbacks
     public void OnLoginButtonClicked()
@@ -455,17 +466,18 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		}
 	}		
 		
-	private void CheckToEnableStartButton()
-	{
-		if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount == maxPlayer)
-		{
-			startGameButton.SetActive(true);
-		}
-		else
-		{
-			startGameButton.SetActive(false);
-		}
-	}
+    private void CheckToEnableStartButton()
+    {
+        if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount == MaxPlayer.Value)
+        {
+            startGameButton.SetActive(true);
+        }
+        else
+        {
+            startGameButton.SetActive(false);
+        }
+    }
+
 
 
 }

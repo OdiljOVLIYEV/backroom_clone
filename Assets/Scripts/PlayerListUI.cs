@@ -20,7 +20,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     public IntVariable MaxPlayer;
     public int requiredPlayerCount ;
      // 🔹 Yangi prefab: har bir xabar uchun
-
+     
+    [SerializeField] private BoolVariable UIPanel;
     public bool enableNight = true;
     public bool enableDay = true;
     [SerializeField] private BoolVariable CAMERALOCK;
@@ -39,6 +40,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     private List<string> nightEvents = new List<string>();
     private void Start()
     {
+
         requiredPlayerCount = MaxPlayer.Value;
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
         RefreshPlayerList();
@@ -93,11 +95,12 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             {
                 CAMERALOCK.Value = false;
                 isNight = true;
+                UIPanel.Value = false;
                 hasVoted = false;
                 nightEvents.Clear();
                 pendingKills.Clear();
                 pendingSaves.Clear();
-
+           
                 if (photonView.IsMine && MessageDisplayer.Instance != null)
                 {
                     MessageDisplayer.Instance.ClearMessagesForAll();
@@ -108,6 +111,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 {
                     nightImage.gameObject.SetActive(true);
                     dayImage.gameObject.SetActive(false);
+                    
                 }
                 
                 RefreshPlayerList();
@@ -127,10 +131,12 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             {
                 CAMERALOCK.Value = true;
                 isNight = false;
+                UIPanel.Value = true;
                 hasVoted = false;
                 voteCounts.Clear();
                 voteLogs.Clear();
                 ResetNightAbilities();
+                
 
                 if (photonView.IsMine && MessageDisplayer.Instance != null)
                 {
@@ -141,6 +147,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 {
                     nightImage.gameObject.SetActive(false);
                     dayImage.gameObject.SetActive(true);
+                    
                 }
 
                 yield return StartCoroutine(ShowNightResultsCoroutine());
@@ -411,7 +418,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 MessageDisplayer.Instance.ShowWinnerMessageToAll("Shahar g‘alaba qildi!", Color.green);
             }
            
-            StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
+            StartCoroutine(LoadSceneAfterDelay("level1", 5f));// O‘yin to‘xtaydi
         }
         else if (mafiaAlive >= othersAlive)
         {   
@@ -432,7 +439,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
                 MessageDisplayer.Instance.ShowWinnerMessageToAll("Mafiya g‘alaba qildi!", Color.red);
             }
            
-            StartCoroutine(LoadSceneAfterDelay("LobbyScene", 5f));// O‘yin to‘xtaydi
+            StartCoroutine(LoadSceneAfterDelay("level1", 5f));// O‘yin to‘xtaydi
         }
     }
     
