@@ -21,24 +21,31 @@ public class MessageDisplayer : MonoBehaviourPun
     [SerializeField] private GameObject UI;
     private void Awake()
     {
-        if (messageInputField != null)
-        {
-            messageInputField.characterLimit = 30;
-        }
-        
         if (Instance != null && Instance != this)
         {
             Destroy(this);
             return;
         }
         Instance = this;
+
+        if (messageInputField != null)
+        {
+            messageInputField.characterLimit = 30;
+        }
+
+        // Bu qatorni faqat MasterClient chaqirsin, yoki xohlagan client (bir marta yetarli)
+        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC(nameof(RPC_HideGameOverText), RpcTarget.AllBuffered);
+        }
     }
+
 
     private void Update()
     {
         Debug.Log("Kun: " + UIPanel.Value);
 
-        if (UIPanel.Value==true)
+       if (UIPanel.Value==true)
         {
             Debug.Log("UI ON");
             UI.SetActive(true);
@@ -50,7 +57,7 @@ public class MessageDisplayer : MonoBehaviourPun
             UI.SetActive(false);
         }
         
-        if (messageInputField != null && Input.GetKeyDown(KeyCode.Return) && messageInputField.isFocused)
+        if (messageInputField != null && Input.GetKeyDown(KeyCode.Space) && messageInputField.isFocused)
         {
             string message = messageInputField.text.Trim();
 
@@ -61,6 +68,15 @@ public class MessageDisplayer : MonoBehaviourPun
                 messageInputField.text = "";
                 EventSystem.current.SetSelectedGameObject(null); // Fokusdan chiqarish
             }
+        }
+    }
+
+    [PunRPC]
+    public void RPC_HideGameOverText()
+    {
+        if (gameOverText != null)
+        {
+            gameOverText.gameObject.SetActive(false);
         }
     }
 

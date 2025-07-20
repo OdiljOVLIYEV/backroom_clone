@@ -25,9 +25,12 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     public bool enableNight = true;
     public bool enableDay = true;
     [SerializeField] private BoolVariable CAMERALOCK;
+
+    [SerializeField] private FloatVariable night;
+    [SerializeField] private FloatVariable day;
     
-    public float nightDuration = 30f;
-    public float dayDuration = 20f;
+    public float nightDuration;
+    public float dayDuration;
     private bool gameStarted = false;
 
     private static bool isNight = false;
@@ -38,8 +41,16 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     private List<Player> pendingKills = new List<Player>();
     private List<Player> pendingSaves = new List<Player>();
     private List<string> nightEvents = new List<string>();
+    
+    private void Awake()
+    {
+        PhotonNetwork.AutomaticallySyncScene = true;
+    }
+
     private void Start()
     {
+        nightDuration = night.Value;
+        dayDuration = day.Value;
 
         requiredPlayerCount = MaxPlayer.Value;
         PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { "isAlive", true } });
@@ -59,6 +70,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
         
     }
+
+  
 
     IEnumerator WaitForAllPlayersThenStart()
     {
@@ -400,16 +413,8 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         if (mafiaAlive == 0)
         {
             StopAllCoroutines();
-            timerText.gameObject.SetActive(false);
-            nightImage.gameObject.SetActive(false);
-            dayImage.gameObject.SetActive(false);
-            GameObject item = Instantiate(playerItemPrefab, listParent);
-            PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
-            if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
-            ui.killButton.gameObject.SetActive(false);
-            ui.investigateButton.gameObject.SetActive(false);
-            ui.protectButton.gameObject.SetActive(false);
-            ui.voteButton.gameObject.SetActive(false);
+            photonView.RPC(nameof(RPC_HideEndGameUI), RpcTarget.All);
+           
             
            
             Debug.Log("Shahar g‘alaba qildi!");
@@ -420,19 +425,14 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
            
             StartCoroutine(LoadSceneAfterDelay("level1", 5f));// O‘yin to‘xtaydi
         }
+        
+        
+        
         else if (mafiaAlive >= othersAlive)
         {   
             StopAllCoroutines();
-            timerText.gameObject.SetActive(false);
-            nightImage.gameObject.SetActive(false);
-            dayImage.gameObject.SetActive(false);
-            GameObject item = Instantiate(playerItemPrefab, listParent);
-            PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
-            if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
-            ui.killButton.gameObject.SetActive(false);
-            ui.investigateButton.gameObject.SetActive(false);
-            ui.protectButton.gameObject.SetActive(false);
-            ui.voteButton.gameObject.SetActive(false);
+            photonView.RPC(nameof(RPC_HideEndGameUI), RpcTarget.All);
+            
             
             if (MessageDisplayer.Instance != null)
             {
@@ -443,13 +443,30 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
         }
     }
     
-    
-
-    IEnumerator LoadSceneAfterDelay(string sceneName, float delay)
+    private IEnumerator LoadSceneAfterDelay(string sceneName, float delay)
     {
         yield return new WaitForSeconds(delay);
-        SceneManager.LoadScene(sceneName);
+
+        
+            PhotonNetwork.LoadLevel(sceneName); // Bu barcha o‘yinchilarga yuklaydi
+        
     }
+    
+    [PunRPC]
+    public void RPC_HideEndGameUI()
+    {
+        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (nightImage != null) nightImage.gameObject.SetActive(false);
+        if (dayImage != null) dayImage.gameObject.SetActive(false);
+        GameObject item = Instantiate(playerItemPrefab, listParent);
+        PlayerListItemUI ui = item.GetComponent<PlayerListItemUI>();
+        if (ui == null) ui.MafiakillButton.gameObject.SetActive(false);
+        ui.killButton.gameObject.SetActive(false);
+        ui.investigateButton.gameObject.SetActive(false);
+        ui.protectButton.gameObject.SetActive(false);
+        ui.voteButton.gameObject.SetActive(false);
+    }
+
 
     public Player GetPhotonPlayerByName(string name)
     {
