@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Photon.Voice.Unity.Editor
 {
-    [InitializeOnLoad]
+    [InitializeOnLoad] // calls static constructor when script is recompiled
     public static class PhotonVoiceEditorUtils
     {
         public const string PHOTON_VIDEO_DEFINE_SYMBOL = "PHOTON_VOICE_VIDEO_ENABLE";
@@ -19,7 +19,7 @@ namespace Photon.Voice.Unity.Editor
             {
 #if !PHOTON_VOICE_VIDEO_AVAILABLE
                 Debug.Log("Photon Video is available");
-                AddScriptingDefineSymbolToAllBuildTargetGroups(PHOTON_VIDEO_AVAILABLE_DEFINE_SYMBOL);
+                Realtime.PhotonEditorUtils.AddScriptingDefineSymbolToAllBuildTargetGroups(PHOTON_VIDEO_AVAILABLE_DEFINE_SYMBOL);
                 TriggerRecompile();
 #endif
             }
@@ -32,28 +32,27 @@ namespace Photon.Voice.Unity.Editor
             }
         }
 
+        // triggers this calss recompilation after define symbols change
         private static void TriggerRecompile()
         {
             AssetDatabase.ImportAsset("Assets/Photon/PhotonVoice/Code/Editor/PhotonVoiceEditorUtils.cs");
         }
 
+        /// <summary>True if the ChatClient of the Photon Chat API is available. If so, the editor may (e.g.) show additional options in settings.</summary>
         public static bool HasChat
         {
             get
             {
-                return Type.GetType("Photon.Chat.ChatClient, Assembly-CSharp") != null ||
-                       Type.GetType("Photon.Chat.ChatClient, Assembly-CSharp-firstpass") != null ||
-                       Type.GetType("Photon.Chat.ChatClient, PhotonChat") != null;
+                return Type.GetType("Photon.Chat.ChatClient, Assembly-CSharp") != null || Type.GetType("Photon.Chat.ChatClient, Assembly-CSharp-firstpass") != null || Type.GetType("Photon.Chat.ChatClient, PhotonChat") != null;
             }
         }
 
+        /// <summary>True if the PhotonNetwork of the PUN is available. If so, the editor may (e.g.) show additional options in settings.</summary>
         public static bool HasPun
         {
             get
             {
-                return Type.GetType("Photon.Pun.PhotonNetwork, Assembly-CSharp") != null ||
-                       Type.GetType("Photon.Pun.PhotonNetwork, Assembly-CSharp-firstpass") != null ||
-                       Type.GetType("Photon.Pun.PhotonNetwork, PhotonUnityNetworking") != null;
+                return Type.GetType("Photon.Pun.PhotonNetwork, Assembly-CSharp") != null || Type.GetType("Photon.Pun.PhotonNetwork, Assembly-CSharp-firstpass") != null || Type.GetType("Photon.Pun.PhotonNetwork, PhotonUnityNetworking") != null;
             }
         }
 
@@ -116,8 +115,9 @@ namespace Photon.Voice.Unity.Editor
         [MenuItem("Window/Photon Voice/Enable Video", false, 4)]
         private static void EnableVideo()
         {
-            Debug.Log("Enabling Photon Video (setting define '" + PHOTON_VIDEO_DEFINE_SYMBOL + "').");
-            AddScriptingDefineSymbolToAllBuildTargetGroups(PHOTON_VIDEO_DEFINE_SYMBOL);
+            UnityEngine.Debug.Log("Enabling Photon Video (setting define '" + PHOTON_VIDEO_DEFINE_SYMBOL + "').");
+
+            Realtime.PhotonEditorUtils.AddScriptingDefineSymbolToAllBuildTargetGroups(PHOTON_VIDEO_DEFINE_SYMBOL);
             TriggerRecompile();
         }
 #endif
@@ -132,7 +132,7 @@ namespace Photon.Voice.Unity.Editor
                 {
                     Debug.LogWarningFormat("Directory \"{0}\" not deleted.", path);
                 }
-                DeleteFile(path + ".meta");
+                DeleteFile(string.Concat(path, ".meta"));
             }
             else
             {
@@ -160,6 +160,43 @@ namespace Photon.Voice.Unity.Editor
             return Application.isPlaying && !IsPrefab(go);
         }
 
+        /// <summary>
+        /// Removes a given scripting define symbol to all build target groups
+        /// You can see all scripting define symbols ( not the internal ones, only the one for this project), in the PlayerSettings inspector
+        /// </summary>
+        /// <param name="defineSymbol">Define symbol.</param>
+        public static void RemoveScriptingDefineSymbolToAllBuildTargetGroups(string defineSymbol)
+        {
+            foreach (BuildTarget target in Enum.GetValues(typeof(BuildTarget)))
+            {
+                BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
+
+                if (group == BuildTargetGroup.Unknown)
+                {
+                    continue;
+                }
+
+                var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').Select(d => d.Trim()).ToList();
+
+                if (defineSymbols.Contains(defineSymbol) && defineSymbols.Remove(defineSymbol))
+                {
+                    try
+                    {
+                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", defineSymbols.ToArray()));
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogErrorFormat("Could not remove \"{0}\" Scripting Define Symbol for build target: {1} group: {2} {3}", defineSymbol, target, group, e);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check if a GameObject is a prefab asset or part of a prefab asset, as opposed to an instance in the scene hierarchy
+        /// </summary>
+        /// <returns><c>true</c>, if a prefab asset or part of it, <c>false</c> otherwise.</returns>
+        /// <param name="go">The GameObject to check</param>
         public static bool IsPrefab(GameObject go)
         {
 #if UNITY_2021_2_OR_NEWER
@@ -171,81 +208,43 @@ namespace Photon.Voice.Unity.Editor
 #endif
         }
 
-        public static void RemoveScriptingDefineSymbolToAllBuildTargetGroups(string defineSymbol)
-        {
-            foreach (BuildTarget target in Enum.GetValues(typeof(BuildTarget)))
-            {
-                BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                if (group == BuildTargetGroup.Unknown) continue;
-
-                var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group)
-                    .Split(';').Select(d => d.Trim()).ToList();
-
-                if (defineSymbols.Contains(defineSymbol) && defineSymbols.Remove(defineSymbol))
-                {
-                    try
-                    {
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", defineSymbols));
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogErrorFormat("Could not remove \"{0}\" for target: {1}, group: {2}, {3}", defineSymbol, target, group, e);
-                    }
-                }
-            }
-        }
-
-        public static void AddScriptingDefineSymbolToAllBuildTargetGroups(string defineSymbol)
-        {
-            foreach (BuildTarget target in Enum.GetValues(typeof(BuildTarget)))
-            {
-                BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                if (group == BuildTargetGroup.Unknown) continue;
-
-                var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group)
-                    .Split(';').Select(d => d.Trim()).ToList();
-
-                if (!defineSymbols.Contains(defineSymbol))
-                {
-                    defineSymbols.Add(defineSymbol);
-                    try
-                    {
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", defineSymbols));
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogErrorFormat("Could not add \"{0}\" for target: {1}, group: {2}, {3}", defineSymbol, target, group, e);
-                    }
-                }
-            }
-        }
-
+        /// <summary>
+        /// Removes PUN2's Script Define Symbols from project
+        /// </summary>
         public static void CleanUpPunDefineSymbols()
         {
             foreach (BuildTarget target in Enum.GetValues(typeof(BuildTarget)))
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                if (group == BuildTargetGroup.Unknown) continue;
+
+                if (group == BuildTargetGroup.Unknown)
+                {
+                    continue;
+                }
 
                 var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group)
-                    .Split(';').Select(d => d.Trim()).ToList();
+                    .Split(';')
+                    .Select(d => d.Trim())
+                    .ToList();
 
                 List<string> newDefineSymbols = new List<string>();
                 foreach (var symbol in defineSymbols)
                 {
                     if ("PHOTON_UNITY_NETWORKING".Equals(symbol) || symbol.StartsWith("PUN_2_"))
+                    {
                         continue;
+                    }
 
                     newDefineSymbols.Add(symbol);
                 }
 
                 try
                 {
-                    PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", newDefineSymbols));
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", newDefineSymbols.ToArray()));
                 }
                 catch (Exception e)
                 {
-                    Debug.LogErrorFormat("Could not clean PUN2 define symbols for target: {0}, group: {1}, {2}", target, group, e);
+                    Debug.LogErrorFormat("Could not set clean up PUN2's define symbols for build target: {0} group: {1}, {2}", target, group, e);
                 }
             }
         }

@@ -1,42 +1,56 @@
-using UnityEngine;
 using Photon.Pun;
-using Photon.Voice.Unity; // Recorder va Speaker uchun
-using Photon.Voice.PUN;   // PhotonVoiceNetwork uchun
+using Photon.Voice.PUN;
+using Photon.Voice.Unity;
+using UnityEngine;
 
 public class VoiceChatSetup : MonoBehaviourPun
 {
-    private Recorder recorder;
-    private bool wasTransmitting = false;
-
-    void Start()
+    private void Start()
     {
-        if (photonView.IsMine)
+        Debug.Log("VoiceChatSetup: Start called on " + gameObject.name);
+
+        if (!photonView.IsMine)
         {
-            recorder = GetComponent<Recorder>();
+            Debug.Log("VoiceChatSetup: Not local player, disabling voice components on " + gameObject.name);
+
+            var voiceView = GetComponent<PhotonVoiceView>();
+            var recorder = GetComponent<Recorder>();
+
+            if (voiceView != null)
+                voiceView.enabled = false;
+            else
+                Debug.LogWarning("VoiceChatSetup: PhotonVoiceView not found on " + gameObject.name);
+
             if (recorder != null)
-            {
-                recorder.TransmitEnabled = false; // Dastlab mic o‘chirilgan
-            }
+                recorder.enabled = false;
+            else
+                Debug.LogWarning("VoiceChatSetup: Recorder not found on " + gameObject.name);
+
+            return;
         }
-    }
 
-    void Update()
-    {
-        if (!photonView.IsMine || recorder == null) return;
+        Debug.Log("VoiceChatSetup: Local player detected, configuring voice...");
 
-        bool isTalking = Input.GetKey(KeyCode.T);
-        recorder.TransmitEnabled = isTalking;
+        var voiceViewLocal = GetComponent<PhotonVoiceView>();
+        var recorderLocal = GetComponent<Recorder>();
 
-        // Debug: faqat holat o'zgarganda yoz
-        if (isTalking && !wasTransmitting)
+        if (voiceViewLocal == null)
         {
-            Debug.Log("📢 VoiceChat: Transmitting started.");
-            wasTransmitting = true;
+            Debug.LogError("VoiceChatSetup: PhotonVoiceView not found on local player!");
+            return;
         }
-        else if (!isTalking && wasTransmitting)
+
+        if (recorderLocal == null)
         {
-            Debug.Log("🔇 VoiceChat: Transmitting stopped.");
-            wasTransmitting = false;
+            Debug.LogError("VoiceChatSetup: Recorder not found on local player!");
+            return;
         }
+
+        // Configure Recorder
+        recorderLocal.TransmitEnabled = true;
+        recorderLocal.VoiceDetection = true;
+
+        Debug.Log("VoiceChatSetup: Recorder TransmitEnabled = " + recorderLocal.TransmitEnabled);
+        Debug.Log("VoiceChatSetup: Recorder VoiceDetection = " + recorderLocal.VoiceDetection);
     }
 }
