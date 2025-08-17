@@ -24,14 +24,13 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     [SerializeField] private BoolVariable UIPanel;
     public bool enableNight = true;
     public bool enableDay = true;
-    [SerializeField] private BoolVariable CAMERALOCK;
 
     [SerializeField] private FloatVariable night;
     [SerializeField] private FloatVariable day;
     
     public float nightDuration;
     public float dayDuration;
-    private bool gameStarted = false;
+
 
     private static bool isNight = false;
     private bool hasVoted = false;
@@ -98,15 +97,15 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
     {
         
         
-        yield return new WaitForSeconds(2f);
-        gameStarted = true;
+        //yield return new WaitForSeconds(2f);
+      
         while (true)
         {
             // 🌙 TUN
             // 🌙 TUN
             if (enableNight)
             {
-                CAMERALOCK.Value = false;
+               
                 isNight = true;
                 UIPanel.Value = false;
                 hasVoted = false;
@@ -142,7 +141,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
             // ☀️ KUN
             if (enableDay)
             {
-                CAMERALOCK.Value = true;
+               
                 isNight = false;
                 UIPanel.Value = true;
                 hasVoted = false;
@@ -384,7 +383,7 @@ public class PlayerListUI : MonoBehaviourPunCallbacks
 
             // KUN REJIMI OVOZ BERISH
             // ✅ Ovoz berish tugmasini faqat o‘yin boshlangan bo‘lsa va kun bo‘lsa ko‘rsatamiz
-            if (gameStarted && !isNight && enableDay && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
+            if (isNight && enableDay && myRole != null && myRole.isAlive && pr != null && pr.isAlive && player != PhotonNetwork.LocalPlayer)
 
 
             {

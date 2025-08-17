@@ -7,7 +7,7 @@ using Photon.Pun;
 public class MouseLook : MonoBehaviour
 {
     public float mouseSensitivity = 100f;
-    [SerializeField] private BoolVariable CAMERALOCK;
+   
     
     
     public float minY = -90f; // Vertikal pastga qarash limiti
@@ -26,8 +26,9 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
-        if (CAMERALOCK.Value == false) 
+        if (Input.GetKey(KeyCode.LeftShift))
         {
+            Cursor.lockState = CursorLockMode.Confined;
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -41,6 +42,13 @@ public class MouseLook : MonoBehaviour
 
             // Faqat kamera harakat qiladi
             transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        {
+            
         }
         
     }
